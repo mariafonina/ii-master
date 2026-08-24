@@ -8,7 +8,7 @@
                     [--template ../scorecard.html] [--result ~/.claude/ii-master-result.json]
                     [--config ../config.md] [--out ~/.claude/ii-master-result.html]
 """
-import argparse, datetime, html, json, os, re, sys, webbrowser
+import argparse, datetime, html, json, os, re, sys, urllib.parse, webbrowser
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import common
@@ -56,18 +56,19 @@ GAP_S = ('<div class="gap"><p><b>Трек «первые деньги»</b> — 
          '— девять каналов первых заказов.</p></div>')
 CRS = '<li><span class="b">{nn}</span><span><b>{title}</b> — {desc}.{tag}</span></li>'
 CRS_TAG = ' <em class="tag">под твой пробел</em>'
-# Мини-курсы платформы (названия сверены по чату 5 потока); третий столбец — слаги пробелов,
-# при пересечении с пробелами человека курс получает пометку «под твой пробел».
+# Мини-курсы платформы (названия сверены по чату 5 потока); третий столбец — слаги пробелов
+# (привычки, фишки и program-слаги КОНТРАКТА 6), при пересечении с пробелами человека курс
+# получает пометку «под твой пробел».
 # "strong" — служебный маркер: подсветка только у сильного профиля (score11 >= 8).
 COURSES = [
     ("Предобучение", "стартовая неделя до основного курса: доступы, сервисы, первые шаги без спешки", set()),
     ("Мини-курс «Агенты для новичков»", "свой первый ИИ-агент по шагам",
-     {"iter", "goal", "format", "mode", "tone", "context", "schedule", "slash-commands", "hooks", "plugins"}),
+     {"iter", "goal", "format", "mode", "tone", "context", "schedule", "slash-commands", "hooks", "plugins", "agent"}),
     ("«Шаблоны ИИ-агентов» — мини-курс по агентам OpenClaw и Hermes", "готовые шаблоны своих агентов и работа связками",
-     {"subagents", "headless", "managed-agents", "github-actions", "remote-control", "mcp"}),
+     {"subagents", "headless", "managed-agents", "github-actions", "remote-control", "mcp", "mcp-bot"}),
     ("Мини-курс по Telegram мини-приложению", "своё приложение прямо в Telegram",
-     {"audience", "approach", "examples"}),
-    ("Мини-курс по оплатам", "приём оплат в своём продукте", {"strong"}),
+     {"audience", "approach", "examples", "miniapp"}),
+    ("Мини-курс по оплатам", "приём оплат в своём продукте", {"strong", "payments"}),
     ("Вебинар «ИИ в жизни»", "ИИ для семьи, быта и личных задач", set()),
 ]
 
@@ -82,8 +83,8 @@ def _strip_msgid(t):
 
 
 def parse_labs_map(path):
-    """Куда-ведёт и кейсы по слагам привычек и группам фишек (+ лид сильного профиля)."""
-    out = {"habits": {}, "groups": [], "strong_lead": ""}
+    """Куда-ведёт и кейсы по слагам привычек, группам фишек и program-слагам (+ лид сильного профиля)."""
+    out = {"habits": {}, "groups": [], "program": {}, "strong_lead": ""}
     try:
         txt = open(path, encoding="utf-8").read()
     except Exception:
@@ -94,16 +95,85 @@ def parse_labs_map(path):
         case = re.search(r"\*\*Кейс:\*\*\s*(.*?)\n[ \t]*\n", body, re.S)
         entry = {"lead": _clean(lead.group(1)) if lead else "",
                  "case": _strip_msgid(case.group(1)) if case else ""}
-        hm = re.match(r"([a-z]+) — ", head)
+        hm = re.match(r"([a-z][a-z-]*) — ", head)
         gm = re.match(r"Группа «(.+?)»:\s*(.+)$", head)
         if hm and hm.group(1) in HABITS:
             out["habits"][hm.group(1)] = entry
+        elif hm:
+            out["program"][hm.group(1)] = entry   # program-слаги (КОНТРАКТ 6), раздел «Программа ЛАБС-6»
         elif gm:
             out["groups"].append({"slugs": [s.strip() for s in gm.group(2).split(",")], **entry})
     sm = re.search(r"^## Сильный профиль.*?\*\*Куда ведёт в ЛАБС:\*\*\s*(.*?)\n[ \t]*\n", txt, re.M | re.S)
     if sm:
         out["strong_lead"] = _clean(sm.group(1))
     return out
+
+
+# ── Программа ЛАБС-6 против истории (КОНТРАКТ 6) ────────────────────────────────
+# Пункты — из program.md (снимок лендинга, обновляется вручную); отметки — из полей
+# program_used / program_gaps result.json. Шаблоны согласованы с CSS scorecard.html
+# (.prog / .pgrp / .pitem); плашки «уже делаешь» и «пробел» — классы .tag и .miss страницы.
+P_GRP = '<div class="pgrp"><p class="pw">{week}</p>\n{items}</div>'
+P_OK = ('<div class="pitem"><span class="pm">✓</span><span><b>{name}</b> — {does} '
+        '<em class="tag">уже делаешь</em></span></div>')
+P_GAP = ('<div class="pitem down"><span class="pm">—</span><span><b>{name}</b> — {does} '
+         '<span class="miss">пробел</span></span></div>')
+P_NC = '<div class="pitem"><span class="pm">·</span><span><b>{name}</b> — {does}</span></div>'
+GAP_P = '<div class="gap"><p><b>{name}</b> <span class="miss">{week}</span> — {lead}</p></div>'
+
+
+def parse_program(path):
+    """program.md → дата снимка + пункты (слаг, имя, неделя, что делают) в порядке файла."""
+    out = {"date": "", "items": []}
+    try:
+        txt = open(path, encoding="utf-8").read()
+    except Exception:
+        return out
+    dm = re.search(r"\*\*Дата снимка:\*\*\s*([0-9.]+)", txt)
+    if dm:
+        out["date"] = dm.group(1).strip(".")
+    for m in re.finditer(r"^### +([a-z][a-z-]*) — ([^\n]+)\n(.*?)(?=^### |\Z)", txt, re.M | re.S):
+        slug, name, body = m.group(1), m.group(2).strip(), m.group(3)
+        wk = re.search(r"\*\*Неделя:\*\*\s*([^\n]+)", body)
+        ds = re.search(r"\*\*Что делают:\*\*\s*(.*?)\n[ \t]*\n", body, re.S)
+        out["items"].append({"slug": slug, "name": name,
+                             "week": _clean(wk.group(1)) if wk else "",
+                             "does": _clean(ds.group(1)).rstrip(".") if ds else ""})
+    return out
+
+
+def program_block(r, prog, quiz):
+    """{{program_html}} и {{program_note}}: пункты программы группами по неделям с отметками.
+    program_used/program_gaps пустые или отсутствуют → режим «не проверяли» (без отметок)."""
+    used = set(r.get("program_used") or [])
+    gaps = set(r.get("program_gaps") or [])
+    checked = bool(used or gaps)
+    groups = []
+    for it in prog["items"]:
+        if not groups or groups[-1][0] != it["week"]:
+            groups.append((it["week"], []))
+        groups[-1][1].append(it)
+    parts = []
+    for week, items in groups:
+        lines = []
+        for it in items:
+            if checked and it["slug"] in used:
+                lines.append(P_OK.format(name=it["name"], does=it["does"]))
+            elif checked and it["slug"] in gaps:
+                lines.append(P_GAP.format(name=it["name"], does=it["does"]))
+            else:
+                lines.append(P_NC.format(name=it["name"], does=it["does"]))
+        parts.append(P_GRP.format(week=week, items="\n".join(lines)))
+    if not checked:
+        note = ("В этот раз пункты программы не проверяли: чек-лист в экспресс-тесте пропущен. "
+                "Пройди замер по реальной истории — отметки появятся сами.")
+    elif quiz:
+        note = ("Отметки — по твоим ответам в чек-листе экспресс-теста. Галка — это ты уже "
+                "делал; плашка «пробел» — этому в ЛАБС учат с нуля.")
+    else:
+        note = ("Отметки — по твоей реальной истории сессий. Галка — следы этого пункта уже "
+                "есть в твоей работе; плашка «пробел» — этому в ЛАБС учат с нуля.")
+    return "\n".join(parts), note
 
 
 def _feature_short(slug):
@@ -115,10 +185,11 @@ def _feature_short(slug):
     return name
 
 
-def labs_gaps_block(r, quiz, strong_profile, pitch_nonempty, bar_labels):
-    """{{labs_gaps_html}}: покрытие ВСЕХ пробелов. Привычки из growth[:2] пропускаются,
-    когда питч непустой (они уже разобраны в питче тем же кейсом) — кроме сильного профиля,
-    где питч про «первые деньги» и пробелы в нём не разбираются."""
+def labs_gaps_block(r, quiz, strong_profile, pitch_nonempty, bar_labels, prog):
+    """{{labs_gaps_html}}: покрытие ВСЕХ пробелов — привычки ниже базы, пробелы программы
+    ЛАБС-6 (program_gaps, КОНТРАКТ 6), группы неиспользуемых фишек. Привычки из growth[:2]
+    пропускаются, когда питч непустой (они уже разобраны в питче тем же кейсом) — кроме
+    сильного профиля, где питч про «первые деньги» и пробелы в нём не разбираются."""
     lm = parse_labs_map(os.path.join(SKILL, "labs_map.md"))
     habits = r.get("habits") or {}
     miss = "в заданиях не проявилась" if quiz else "ниже базы"
@@ -134,6 +205,14 @@ def labs_gaps_block(r, quiz, strong_profile, pitch_nonempty, bar_labels):
         if e and e["lead"]:
             rows.append(GAP.format(name=bar_labels[s], miss=miss, lead=e["lead"],
                                    case=e["case"]))
+    # Пробелы программы: строка на каждый слаг из program_gaps — плашка с неделей,
+    # лид из labs_map (раздел «Программа ЛАБС-6»), кейсов-цитат у программы нет.
+    pmeta = {it["slug"]: it for it in prog["items"]}
+    for s in r.get("program_gaps") or []:
+        e, it = lm["program"].get(s), pmeta.get(s)
+        if e and e["lead"] and it:
+            rows.append(GAP_P.format(name=it["name"], week=it["week"].split("·")[0].strip(),
+                                     lead=e["lead"]))
     unused = set(r.get("features_unused") or [])
     for g in lm["groups"]:
         hit = [s for s in g["slugs"] if s in unused]
@@ -142,7 +221,8 @@ def labs_gaps_block(r, quiz, strong_profile, pitch_nonempty, bar_labels):
                                      lead=g["lead"], case=g["case"]))
     if not rows:
         rows.append('<div class="gap"><p>Пробелов по шкале нет: привычки на уровне базы и выше, '
-                    'проверенные фишки в работе. Смотри трек «первые деньги» и мини-курсы ниже.</p></div>')
+                    'пункты программы и проверенные фишки в работе. Смотри трек «первые деньги» '
+                    'и мини-курсы ниже.</p></div>')
     return "\n".join(rows)
 
 
@@ -247,6 +327,7 @@ def main():
     habits = r.get("habits") or {}
     strong_profile = bool((r.get("extra") or {}).get("strong_profile")) or (r.get("score11") or 0) >= 8  # КОНТРАКТ 5
 
+    # Чекаут-ссылка — РЕЗЕРВ: собирается и печатается в консоль, но в CTA страницы не идёт.
     utm = a.utm_content or ("first-money" if strong_profile else ((r.get("growth") or ["tools"])[0]))
     cta_url = (f"{cfg.get('checkout_url', '')}?utm_source={cfg.get('utm_source', '')}"
                f"&utm_medium={cfg.get('utm_medium', '')}&utm_campaign={cfg.get('utm_campaign', '')}&utm_content={utm}")
@@ -326,12 +407,32 @@ def main():
     if a.pitch and os.path.exists(a.pitch):
         pitch = open(a.pitch, encoding="utf-8").read()
 
+    # Программа ЛАБС-6 против истории (КОНТРАКТ 6): пункты из program.md, отметки из result.json.
+    prog = parse_program(os.path.join(SKILL, "program.md"))
+    program_html, program_note = program_block(r, prog, quiz)
+
     # Блок «ЛАБС»: строки по всем пробелам человека из labs_map.md + мини-курсы с подсветкой.
-    gap_slugs = {s for s in HABITS if not habits.get(s)} | set(r.get("features_unused") or [])
+    gap_slugs = ({s for s in HABITS if not habits.get(s)} | set(r.get("features_unused") or [])
+                 | set(r.get("program_gaps") or []))
     if strong_profile:
         gap_slugs.add("strong")
-    labs_gaps_html = labs_gaps_block(r, quiz, strong_profile, bool(pitch.strip()), BAR_LABELS)
+    labs_gaps_html = labs_gaps_block(r, quiz, strong_profile, bool(pitch.strip()), BAR_LABELS, prog)
     labs_courses_html = labs_courses_block(gap_slugs)
+
+    # CTA страницы — заявка менеджеру (блок «Менеджер продаж» в config.md).
+    # Ссылку WhatsApp render строит сам из manager_prefill (гарантия URL-кодировки);
+    # балл {score11} подставляется в текст заявки — это единственная атрибуция «пришёл с теста».
+    x = "?" if score is None else str(score)
+    ask_prefill = cfg.get("manager_prefill", "").replace("{score11}", x)
+    ask_wa_url = (f"https://wa.me/{cfg.get('manager_phone_raw', '')}"
+                  f"?text={urllib.parse.quote(ask_prefill, safe='')}")
+    cfg_wa = cfg.get("manager_whatsapp", "").replace("{score11}", x)
+    if cfg_wa and cfg_wa != ask_wa_url:
+        print("ВНИМАНИЕ: manager_whatsapp в config.md разошёлся с manager_prefill — "
+              "пересобери ссылку в config.md", file=sys.stderr)
+    max_user = cfg.get("max_username", "")
+    ask_max_html = (f'<a class="abtn" href="https://max.ru/{html.escape(max_user)}">MAX</a>' if max_user
+                    else f'<span class="abtn plain">{html.escape(cfg.get("max_hint", ""))}</span>')
 
     sub = {
         "name": html.escape(r.get("name") or ""),      # пустое имя — шаблон сам уберёт двоеточие
@@ -355,9 +456,20 @@ def main():
         "features_used_html": "\n".join(FLI.format(nn=f"{i:02d}", text=FEATURE_ITEMS.get(s, FEATURE_NAMES.get(s, s)))
                                          for i, s in enumerate(r.get("features_used") or [], 1)),
         "pitch_html": pitch,
+        "program_html": program_html,
+        "program_note": program_note,
+        "program_date": prog["date"] or "24.08.2026",
         "labs_gaps_html": labs_gaps_html,
         "labs_courses_html": labs_courses_html,
         "price": cfg.get("price", ""),
+        "ask_label": cfg.get("ask_label", "Подать заявку на участие"),
+        "ask_wa_url": ask_wa_url,
+        "ask_tg_url": cfg.get("manager_telegram", ""),
+        "ask_max_html": ask_max_html,
+        "ask_prefill": html.escape(ask_prefill),
+        "manager_name": html.escape(cfg.get("manager_name", "")),
+        "manager_phone": cfg.get("manager_phone", ""),
+        # cta_url/cta_label — резерв (чекаут): шаблон их больше не использует
         "cta_url": cta_url,
         "cta_label": cfg.get("cta_label_strong" if strong_profile else "cta_label", "Посмотреть программу ЛАБС"),
         "test_url": cfg.get("test_url", ""),
@@ -374,7 +486,11 @@ def main():
         fh.write(out)
     print("страница:", a.out)
     print("полоса:", emoji, f"{'' if score is None else score} из 11")
-    print("ссылка оплаты:", cta_url)
+    print("заявка WhatsApp:", ask_wa_url)
+    print("заявка Telegram:", sub["ask_tg_url"])
+    print("заявка MAX:", ("https://max.ru/" + max_user) if max_user else cfg.get("max_hint", ""))
+    print("текст заявки:", ask_prefill)
+    print("чекаут (резерв, в CTA не используется):", cta_url)
     if missing:
         print("в шаблоне есть плейсхолдеры без данных:", ", ".join(sorted(missing)))
     if a.open:

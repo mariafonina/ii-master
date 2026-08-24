@@ -21,12 +21,27 @@
     {{ features_html }} — элементы списка неиспользуемых фишек (шаблон — в комментарии перед блоком)
     {{ pitch_html }} — абзацы питча по 1–2 зонам роста, обычные <p>…</p> + <blockquote> (вступление
                      части «Что прокачаем именно у тебя»)
+    {{ program_note }} — подпись блока «Программа ЛАБС-6 против твоей истории»: авто → «по твоей
+                     реальной истории сессий», квиз → «по ответам в чек-листе», пустые
+                     program_used/program_gaps → «не проверяли»
+    {{ program_html }} — пункты программы группами по неделям с отметками ✓ «уже делаешь» /
+                     «пробел»; собирает render.py из program.md + result.json (КОНТРАКТ 6)
+    {{ program_date }} — дата снимка программы из program.md
     {{ labs_gaps_html }} — строки «пробел → чем закрывается в ЛАБС → цитата» по остальным привычкам
-                     ниже базы и группам неиспользуемых фишек; собирает render.py из labs_map.md
+                     ниже базы, пробелам программы (без цитат) и группам неиспользуемых фишек;
+                     собирает render.py из labs_map.md
     {{ labs_courses_html }} — мини-курсы платформы; закрывающие пробелы этого человека — с пометкой
-    {{ price }}      — цена из config.md, стоит один раз у кнопки (в питче цену не называть)
-    {{ cta_label }}  — текст кнопки: «Открыть программу ЛАБС» | для сильного профиля другой CTA
-    {{ cta_url }}    — полная ссылка с UTM
+    {{ price }}      — цена из config.md, стоит один раз у кнопок заявки (в питче цену не называть)
+    {{ ask_label }}  — призыв заявки из config.md: «Подать заявку на участие»
+    {{ ask_wa_url }} — ссылка WhatsApp менеджеру: wa.me с текстом заявки, балл уже подставлен
+    {{ ask_tg_url }} — ссылка Telegram менеджеру по нику (текст заявки человек вставляет сам)
+    {{ ask_max_html }} — третья кнопка: пока у менеджера нет ника в MAX — <span class="abtn plain">
+                     с текстом max_hint из config.md; появился ник — render.py подставит
+                     <a class="abtn" href="https://max.ru/<ник>">MAX</a>
+    {{ ask_prefill }} — текст заявки с баллом («…мой результат — X из 11…») — показывается рядом
+                     с кнопками для тех, кто пишет в Telegram или MAX руками
+    {{ manager_name }}, {{ manager_phone }} — подпись под кнопками: «Катя, менеджер ЛАБС · +7 …»
+                     (чекаут-ссылка из config.md — резерв, на страницу не выводится)
     {{ delta_html }} — блок «было → стало» при перемере (готовая разметка с своим h2);
                      при первом замере — ПУСТАЯ строка, секция скроется сама
 
@@ -128,13 +143,21 @@ li .b{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px; font-
 blockquote{margin:0; padding-left:14px; border-left:2px solid var(--rule); color:var(--ink-2); font-size:15px; line-height:1.55}
 .gaps{display:flex; flex-direction:column; gap:14px}
 .gap{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:14px 18px 15px; display:flex; flex-direction:column; gap:8px}
-.gap .miss{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--warn); white-space:nowrap}
+.gap .miss,.pitem .miss{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--warn); white-space:nowrap}
+.prog{background:var(--surface); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); padding:20px 20px 24px; display:flex; flex-direction:column; gap:18px}
+.pgrp{display:flex; flex-direction:column; gap:4px}
+.pw{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px}
+.pitem{display:grid; grid-template-columns:20px 1fr; gap:10px; align-items:start; font-size:15px; line-height:1.5; padding:2px 0}
+.pitem .pm{font-family:"JetBrains Mono",ui-monospace,monospace; font-weight:600; color:var(--accent); padding-top:1px; text-align:center}
+.pitem.down .pm{color:var(--warn)}
 .gap .q{font-size:14px; line-height:1.55; color:var(--ink-2)}
 .tag{font-family:"JetBrains Mono",ui-monospace,monospace; font-style:normal; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent-ghost); border-radius:3px; padding:2px 6px 1px; white-space:nowrap}
-.cta{align-self:flex-start; display:inline-block; margin-top:4px; padding:13px 22px; border-radius:4px;
-  background:var(--accent); color:var(--ground); font-weight:600; font-size:16px; text-decoration:none}
-.cta:hover{filter:brightness(1.08)}
-.cta:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.ask-btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:2px}
+.abtn{display:inline-block; padding:12px 20px; border-radius:4px;
+  background:var(--accent); color:var(--ground); font-weight:600; font-size:15px; text-decoration:none}
+a.abtn:hover{filter:brightness(1.08)}
+a.abtn:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.abtn.plain{background:transparent; color:var(--ink-2); border:1px dashed var(--ink-3); font-weight:500}
 
 .fine{font-size:14px; line-height:1.6; color:var(--ink-2)}
 .fine b{color:var(--ink); font-weight:600}
@@ -262,6 +285,19 @@ section.delta:empty{display:none}
   </ul>
 </section>
 
+<!-- Программа ЛАБС-6 против истории (КОНТРАКТ 6). Пункты и дату снимка render.py берёт из
+     program.md (обновляется с лендинга вручную), отметки — из program_used/program_gaps
+     result.json; при пустых полях блок выходит без отметок с подписью «не проверяли».
+     Шаблоны строк P_GRP/P_OK/P_GAP/P_NC — в render.py, классы .prog/.pgrp/.pw/.pitem — выше. -->
+<section class="col stack">
+  <h2>Программа ЛАБС-6 против твоей истории</h2>
+  <p class="fine">{{program_note}}</p>
+  <div class="prog">
+{{program_html}}
+  </div>
+  <p class="fine">Программа — снимок лендинга от {{program_date}}; актуальная версия — на странице курса.</p>
+</section>
+
 <section class="col stack">
   <h2>Что с этим делать: ЛАБС</h2>
 
@@ -313,8 +349,15 @@ section.delta:empty{display:none}
 {{labs_courses_html}}
     </ul>
     <div class="pitch">
-      <p>Стоимость: {{price}}, есть рассрочка. Тест бесплатный и полный без покупки; программа и оплата — по кнопке.</p>
-      <a class="cta" href="{{cta_url}}">{{cta_label}}</a>
+      <p>Стоимость: {{price}}, есть рассрочка. Тест бесплатный и полный без покупки.</p>
+      <p><b>{{ask_label}}</b> — напиши Кате в любой из трёх каналов, она ответит на вопросы и поможет с оплатой:</p>
+      <div class="ask-btns">
+        <a class="abtn" href="{{ask_wa_url}}">WhatsApp</a>
+        <a class="abtn" href="{{ask_tg_url}}">Telegram</a>
+        {{ask_max_html}}
+      </div>
+      <p class="fine">{{manager_name}}, менеджер ЛАБС · {{manager_phone}}</p>
+      <p class="fine">В WhatsApp текст заявки подставится сам. Пишешь в Telegram или MAX — отправь его первым сообщением: «{{ask_prefill}}»</p>
     </div>
   </div>
 </section>

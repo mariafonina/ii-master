@@ -23,8 +23,16 @@
 6. `python3 M/compute.py --name "Имя" [--mark-used a,b] [--mark-unused c]` — профиль против базы
    Anthropic → `~/.claude/ii-master-result.json` (КОНТРАКТ 2). Прежний результат уезжает в
    `~/.claude/ii-master-result.prev.json`, в консоли — дельта по привычкам.
-7. `python3 M/render.py --pitch pitch.html [--utm-content слаг] --open` — подстановка в
-   `../scorecard.html` → `~/.claude/ii-master-result.html`, открыть в браузере.
+7. **Программа ЛАБС-6 (КОНТРАКТ 6, делает скилл, скрипта нет):** по маркерам «Детект» из
+   `../program.md` и смысловому обзору сессий разложить 11 program-слагов на `program_used` /
+   `program_gaps` и дописать оба массива в `~/.claude/ii-master-result.json` до рендера
+   (compute.py этих полей не пишет). Пустые или отсутствующие поля render.py показывает как
+   «не проверяли».
+8. `python3 M/render.py --pitch pitch.html [--utm-content слаг] --open` — подстановка в
+   `../scorecard.html` → `~/.claude/ii-master-result.html`, открыть в браузере. CTA страницы —
+   заявка менеджеру (блок «Менеджер продаж» config.md): render.py сам строит ссылку WhatsApp из
+   `manager_prefill` с баллом «X из 11», печатает ссылки заявки в консоль; чекаут-ссылка с utm —
+   резерв, только в консоли.
 
 ## Разметка: дисциплина
 
@@ -129,16 +137,24 @@ Report, январь 2026, 9 830 размеченных диалогов). Ци�
 Текущий шаблон scorecard.html использует: `{{name}}` `{{mode_badge}}` (дважды) `{{date}}`
 `{{score11}}` (дважды) `{{score_caption}}` `{{score_tile_k}}` `{{score_note}}` `{{above_base}}`
 `{{above_tile_cls}}` `{{profile_note}}` `{{bars_html}}` `{{delta_html}}` `{{features_html}}`
-`{{pitch_html}}` `{{labs_gaps_html}}` `{{labs_courses_html}}` `{{price}}` `{{cta_url}}`
-`{{cta_label}}`. Замена простая текстовая, каждый плейсхолдер — во всех вхождениях; пустой
-`features_unused` рендерится строкой «фишки не проверялись» вместо пустого блока. Блок ЛАБС
-(`labs_gaps_html`, `labs_courses_html`) render.py собирает сам: строки пробелов — из полей
-«Куда ведёт в ЛАБС» и «Кейс» в labs_map.md, мини-курсы — из списка COURSES в render.py
-(пересечение с пробелами человека даёт пометку «под твой пробел»).
+`{{program_note}}` `{{program_html}}` `{{program_date}}` `{{pitch_html}}` `{{labs_gaps_html}}`
+`{{labs_courses_html}}` `{{price}}` `{{ask_label}}` `{{ask_wa_url}}` `{{ask_tg_url}}`
+`{{ask_max_html}}` `{{ask_prefill}}` `{{manager_name}}` `{{manager_phone}}`.
+Замена простая текстовая, каждый плейсхолдер — во всех вхождениях; пустой
+`features_unused` рендерится строкой «фишки не проверялись» вместо пустого блока. Блок
+«Программа ЛАБС-6 против твоей истории» (`program_*`) render.py собирает из `../program.md`
+(пункты, недели, дата снимка) и полей `program_used`/`program_gaps` result.json — оба пустые →
+блок без отметок с подписью «не проверяли». Блок ЛАБС (`labs_gaps_html`, `labs_courses_html`)
+render.py собирает сам: строки пробелов — из полей «Куда ведёт в ЛАБС» и «Кейс» в labs_map.md
+(привычки и группы фишек — с кейсом, program-слаги — без кейсов), мини-курсы — из списка COURSES
+в render.py (пересечение с пробелами человека, включая пробелы программы, даёт пометку «под твой
+пробел»). Блок заявки менеджеру (`ask_*`, `manager_*`) — из блока «Менеджер продаж» config.md;
+`cta_url`/`cta_label` (чекаут) шаблон больше не использует — резерв.
 
 render.py дополнительно умеет (на случай смены шаблона): `{{composite_pct}}` `{{dialogs_n}}`
 `{{base_per_dialog}}` `{{emoji_bar}}` `{{strong_html}}` `{{growth_html}}`
-`{{features_used_html}}` `{{test_url}}` `{{handle}}` `{{test_name}}` и по каждому
-слагу привычки `{{rate_<слаг>}}` `{{pct_<слаг>}}` `{{base_<слаг>}}` `{{cls_<слаг>}}`
-`{{name_<слаг>}}` `{{flag_<слаг>}}`. Разметка строк полосы и элементов фишек синхронизирована с
-HTML-комментариями внутри scorecard.html; менять — в обоих местах (константы в начале render.py).
+`{{features_used_html}}` `{{test_url}}` `{{handle}}` `{{test_name}}` `{{cta_url}}` `{{cta_label}}`
+и по каждому слагу привычки `{{rate_<слаг>}}` `{{pct_<слаг>}}` `{{base_<слаг>}}` `{{cls_<слаг>}}`
+`{{name_<слаг>}}` `{{flag_<слаг>}}`. Разметка строк полосы, элементов фишек и строк программы
+синхронизирована с HTML-комментариями внутри scorecard.html; менять — в обоих местах (константы
+в начале render.py).
