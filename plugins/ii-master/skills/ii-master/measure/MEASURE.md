@@ -127,13 +127,18 @@ Report, январь 2026, 9 830 размеченных диалогов). Ци�
 ## Плейсхолдеры scorecard.html (render.py)
 
 Текущий шаблон scorecard.html использует: `{{name}}` `{{mode_badge}}` (дважды) `{{date}}`
-`{{score11}}` (дважды) `{{score_note}}` `{{bars_html}}` `{{features_html}}` `{{pitch_html}}`
-`{{cta_url}}` `{{cta_label}}`. Замена простая текстовая, каждый плейсхолдер — во всех вхождениях;
-пустой `features_unused` рендерится строкой «фишки не проверялись» вместо пустого блока.
+`{{score11}}` (дважды) `{{score_caption}}` `{{score_tile_k}}` `{{score_note}}` `{{above_base}}`
+`{{above_tile_cls}}` `{{profile_note}}` `{{bars_html}}` `{{delta_html}}` `{{features_html}}`
+`{{pitch_html}}` `{{labs_gaps_html}}` `{{labs_courses_html}}` `{{price}}` `{{cta_url}}`
+`{{cta_label}}`. Замена простая текстовая, каждый плейсхолдер — во всех вхождениях; пустой
+`features_unused` рендерится строкой «фишки не проверялись» вместо пустого блока. Блок ЛАБС
+(`labs_gaps_html`, `labs_courses_html`) render.py собирает сам: строки пробелов — из полей
+«Куда ведёт в ЛАБС» и «Кейс» в labs_map.md, мини-курсы — из списка COURSES в render.py
+(пересечение с пробелами человека даёт пометку «под твой пробел»).
 
-render.py дополнительно умеет (на случай смены шаблона): `{{score_caption}}` `{{composite_pct}}`
-`{{dialogs_n}}` `{{base_per_dialog}}` `{{emoji_bar}}` `{{strong_html}}` `{{growth_html}}`
-`{{features_used_html}}` `{{test_url}}` `{{handle}}` `{{test_name}}` `{{delta_html}}` и по каждому
+render.py дополнительно умеет (на случай смены шаблона): `{{composite_pct}}` `{{dialogs_n}}`
+`{{base_per_dialog}}` `{{emoji_bar}}` `{{strong_html}}` `{{growth_html}}`
+`{{features_used_html}}` `{{test_url}}` `{{handle}}` `{{test_name}}` и по каждому
 слагу привычки `{{rate_<слаг>}}` `{{pct_<слаг>}}` `{{base_<слаг>}}` `{{cls_<слаг>}}`
 `{{name_<слаг>}}` `{{flag_<слаг>}}`. Разметка строк полосы и элементов фишек синхронизирована с
 HTML-комментариями внутри scorecard.html; менять — в обоих местах (константы в начале render.py).

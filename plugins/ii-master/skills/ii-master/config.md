@@ -9,7 +9,7 @@ test_name: ИИ-мастер
 handle: "@mariafonina"
 test_url: https://labsme.ru/ai
 checkout_url: https://pay.labsme.ru/labs-6-kurs
-utm_source: fluency-test
+utm_source: ii-master
 utm_medium: plugin
 utm_campaign: labs6
 price: 39 990 ₽

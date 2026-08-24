@@ -8,11 +8,23 @@
     {{ mode_badge }} — короткий бейдж метода: «экспресс-тест» | «по реальной истории · 68 диалогов»
     {{ date }}       — дата замера, «23.08.2026»
     {{ score11 }}    — целое 0–11
-    {{ score_note }} — подпись под баллом в тайле: авто → «привычек в среднем на диалог»;
-                     квиз → «привычек показано в трёх заданиях»
+    {{ score_caption }} — хвост заголовка h1: авто → «в среднем за диалог»; квиз → «в экспресс-тесте»
+    {{ score_tile_k }}  — заголовок главного тайла: авто → «В среднем за диалог»; квиз → «Твой результат»
+    {{ score_note }} — подпись под баллом в тайле: авто → «Привычка засчитывается диалогу, только если
+                     в нём проявилась…»; квиз → «привычек показано в трёх заданиях»
+    {{ above_base }} — сколько привычек не ниже базы Anthropic (единицы в habits), 0–11
+    {{ above_tile_cls }} — класс тайла «Выше среднего пользователя»: авто → пустая строка; квиз → « off»
+                     (тайл скрыт: в экспресс-тесте балл уже равен числу показанных привычек)
+    {{ profile_note }} — пояснение к полосам профиля: авто → про долю диалогов и частоту;
+                     квиз → про «показана в заданиях или нет»
     {{ bars_html }}  — 11 строк полос в порядке контракта 1 (шаблон строки — в комментарии перед блоком)
     {{ features_html }} — элементы списка неиспользуемых фишек (шаблон — в комментарии перед блоком)
-    {{ pitch_html }} — абзацы питча, обычные <p>…</p> (1–3 шт.)
+    {{ pitch_html }} — абзацы питча по 1–2 зонам роста, обычные <p>…</p> + <blockquote> (вступление
+                     части «Что прокачаем именно у тебя»)
+    {{ labs_gaps_html }} — строки «пробел → чем закрывается в ЛАБС → цитата» по остальным привычкам
+                     ниже базы и группам неиспользуемых фишек; собирает render.py из labs_map.md
+    {{ labs_courses_html }} — мини-курсы платформы; закрывающие пробелы этого человека — с пометкой
+    {{ price }}      — цена из config.md, стоит один раз у кнопки (в питче цену не называть)
     {{ cta_label }}  — текст кнопки: «Открыть программу ЛАБС» | для сильного профиля другой CTA
     {{ cta_url }}    — полная ссылка с UTM
     {{ delta_html }} — блок «было → стало» при перемере (готовая разметка с своим h2);
@@ -83,6 +95,7 @@ section{display:flex; flex-direction:column; gap:20px}
 .tile .v.up{color:var(--accent)}
 .tile .v.txt{font-size:21px; line-height:1.25; letter-spacing:0}
 .tile .n{font-size:14px; color:var(--ink-2); line-height:1.45}
+.tile.off{display:none}
 
 .chart{background:var(--surface); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); overflow:hidden}
 .legend{display:flex; flex-wrap:wrap; gap:6px 22px; padding:16px 20px; border-bottom:1px solid var(--rule); font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11.5px; color:var(--ink-2)}
@@ -93,6 +106,7 @@ section{display:flex; flex-direction:column; gap:20px}
 .grp{padding:18px 20px 22px}
 .row{display:grid; grid-template-columns:minmax(150px,225px) 1fr 100px; align-items:center; gap:14px; padding:5px 0}
 .row .lab{font-size:14.5px; line-height:1.3}
+.row .lab .d{display:block; font-size:12px; line-height:1.35; color:var(--ink-2); margin-top:1px}
 .track{position:relative; height:20px; background:var(--track); border-radius:2px}
 .fill{position:absolute; top:0; bottom:0; left:0; border-radius:2px; background:var(--accent)}
 .row.down .fill{background:var(--warn)}
@@ -111,6 +125,12 @@ li .b{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px; font-
 
 .pitch{background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:4px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
 .pitch p{line-height:1.6}
+blockquote{margin:0; padding-left:14px; border-left:2px solid var(--rule); color:var(--ink-2); font-size:15px; line-height:1.55}
+.gaps{display:flex; flex-direction:column; gap:14px}
+.gap{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:14px 18px 15px; display:flex; flex-direction:column; gap:8px}
+.gap .miss{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--warn); white-space:nowrap}
+.gap .q{font-size:14px; line-height:1.55; color:var(--ink-2)}
+.tag{font-family:"JetBrains Mono",ui-monospace,monospace; font-style:normal; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent-ghost); border-radius:3px; padding:2px 6px 1px; white-space:nowrap}
 .cta{align-self:flex-start; display:inline-block; margin-top:4px; padding:13px 22px; border-radius:4px;
   background:var(--accent); color:var(--ground); font-weight:600; font-size:16px; text-decoration:none}
 .cta:hover{filter:brightness(1.08)}
@@ -130,22 +150,44 @@ section.delta:empty{display:none}
 
 <header class="col stack">
   <p class="eyebrow"><span>ИИ-мастер</span><span class="badge">{{mode_badge}}</span><span>{{date}}</span></p>
-  <h1><span class="nm">{{name}}</span>{{score11}} из 11 привычек уверенной работы с&nbsp;ИИ</h1>
-  <p class="lede">Расклад по одиннадцати привычкам из исследования Anthropic: что уже в работе, что даст самый быстрый прирост и какие фишки Claude пока простаивают.</p>
+  <h1><span class="nm">{{name}}</span>{{score11}} из 11 привычек {{score_caption}}</h1>
+  <p class="lede">Одиннадцать привычек уверенной работы с&nbsp;ИИ — по шкале из исследования Anthropic. Сначала — что это за привычки, дальше твой итог, профиль по каждой из них и фишки Claude, которые пока простаивают.</p>
 </header>
 
+<!-- Определения привычек — статичный текст, порядок = контракт 1 (как у полос профиля).
+     Строки-определения продублированы в render.py (DEFS — подписи под названиями полос): менять здесь и там вместе. -->
 <section class="col stack">
+  <h2>Что мы меряли: 11 привычек</h2>
+  <p class="fine">Каждая привычка — конкретное действие в запросе или в разборе ответа. У каждой ниже — какое это поведение и фраза-пример.</p>
+  <ul>
+    <li><span class="b">01</span><span><b>Итерирует и уточняет</b> — первый ответ принимает как черновик и дожимает правками: «усиль вот это, убери то, теперь собери финальную версию».</span></li>
+    <li><span class="b">02</span><span><b>Проясняет цель до просьбы</b> — в запросе сказано, зачем нужен результат: «мне это нужно, чтобы директор дал добро на запуск».</span></li>
+    <li><span class="b">03</span><span><b>Даёт образцы «как надо»</b> — показывает пример или планку качества: «хорошо = вот этот пост; такого быть не должно: продажа в лоб».</span></li>
+    <li><span class="b">04</span><span><b>Задаёт формат и структуру</b> — называет, в каком виде нужен результат: «таблица на пять строк, в конце вывод».</span></li>
+    <li><span class="b">05</span><span><b>Назначает роль и правила</b> — говорит модели, кем быть и как работать: «будь критиком; не хватает данных — спрашивай».</span></li>
+    <li><span class="b">06</span><span><b>Проговаривает тон и стиль</b> — задаёт голос текста: «по-деловому, без канцелярита» или «просто, как новичку».</span></li>
+    <li><span class="b">07</span><span><b>Даёт контекст, которого у модели нет</b> — прикладывает свои вводные: «вот цены и наша переписка — учти их».</span></li>
+    <li><span class="b">08</span><span><b>Называет адресата</b> — в запросе сказано, для кого результат: «это письмо для бухгалтера». Модель подбирает язык под читателя.</span></li>
+    <li><span class="b">09</span><span><b>Оспаривает логику модели</b> — спрашивает основания вывода: «откуда ты это взял? пересчитай».</span></li>
+    <li><span class="b">10</span><span><b>Советуется о подходе до старта</b> — до «сделай» спрашивает, как подойти: «предложи два-три подхода с минусами, я выберу».</span></li>
+    <li><span class="b">11</span><span><b>Проверяет факты и цифры</b> — сверяет руками цифры, даты и названия: «эти 68% — из какого исследования?».</span></li>
+  </ul>
+</section>
+
+<section class="col stack">
+  <h2>Итог замера</h2>
   <div class="tiles">
-    <div class="tile"><span class="k">Твой результат</span><span class="v up">{{score11}}<small> / 11</small></span><span class="n">{{score_note}}</span></div>
-    <div class="tile"><span class="k">База</span><span class="v">3–4<small> / 11</small></span><span class="n">у среднего пользователя — по 9 830 размеченным диалогам исследования Anthropic</span></div>
-    <div class="tile"><span class="k">Метод</span><span class="v txt">{{mode_badge}}</span><span class="n">шкала одна для обоих методов: экспресс-тест ≈ твоя лучшая сессия, по реальной истории — среднее по диалогам</span></div>
+    <div class="tile"><span class="k">{{score_tile_k}}</span><span class="v up">{{score11}}<small> / 11</small></span><span class="n">{{score_note}}</span></div>
+    <div class="tile{{above_tile_cls}}"><span class="k">Выше среднего пользователя</span><span class="v">{{above_base}}<small> / 11</small></span><span class="n">привычек встречаются у тебя чаще, чем у среднего пользователя, — это зелёные полосы в профиле ниже</span></div>
+    <div class="tile"><span class="k">База</span><span class="v">3–4<small> / 11</small></span><span class="n">столько привычек набирает средний пользователь за один диалог — по 9 830 размеченным диалогам исследования Anthropic</span></div>
   </div>
+  <p class="fine">Метод: {{mode_badge}}. Шкала одна для обоих методов: экспресс-тест ≈ твоя лучшая сессия, замер по реальной истории — среднее по всем диалогам.</p>
 </section>
 
 <section class="stack">
   <div class="col stack">
     <h2>Профиль по одиннадцати привычкам</h2>
-    <p class="fine">Полоса — насколько привычка видна у тебя: в замере по реальной истории это доля диалогов, где она встретилась; в экспресс-тесте — показана в заданиях или нет. Штрих — доля диалогов с этой привычкой в исследовании Anthropic. Рыжим — привычки ниже базы.</p>
+    <p class="fine">{{profile_note}}</p>
   </div>
 
   <div class="chart">
@@ -157,28 +199,30 @@ section.delta:empty{display:none}
     <div class="grp">
 <!-- ═══ ШАБЛОН СТРОКИ ПОЛОСЫ для {{ bars_html }} — ровно такая разметка, 11 строк в порядке контракта 1:
      iter, goal, examples, format, mode, tone, context, audience, reason, approach, fact.
+     Внутри .lab после названия — строка-определение <span class="d">…</span> (тексты DEF — в таблице ниже,
+     те же, что в секции «Что мы меряли» и в DEFS render.py; менять во всех местах вместе).
 
      АВТО-режим (есть habit_rates, RATE — процент пользователя, BASE — база Anthropic из compute.py):
-       <div class="row"><span class="lab">Итерирует и уточняет</span><span class="track"><span class="fill" style="width:82.4%"></span><span class="tickline" style="left:85.7%"></span></span><span class="nums"><b>82</b> / 86</span></div>
+       <div class="row"><span class="lab">Итерирует и уточняет<span class="d">первый ответ принимает как черновик и дожимает правками</span></span><span class="track"><span class="fill" style="width:82.4%"></span><span class="tickline" style="left:85.7%"></span></span><span class="nums"><b>82</b> / 86</span></div>
        · класс строки: ниже базы → <div class="row down">, иначе <div class="row">
        · width полосы = RATE%, left штриха = BASE%, в .nums проценты округлить до целых: <b>RATE</b> / BASE
 
      КВИЗ-режим (habits только 0/1):
-       показана:    <div class="row"><span class="lab">Проясняет цель до просьбы</span><span class="track"><span class="fill" style="width:100%"></span><span class="tickline" style="left:51.1%"></span></span><span class="nums"><b>есть</b> / 51</span></div>
-       не показана: <div class="row down"><span class="lab">Даёт образцы «как надо»</span><span class="track"><span class="fill" style="width:0%"></span><span class="tickline" style="left:41.1%"></span></span><span class="nums">нет / 41</span></div>
+       показана:    <div class="row"><span class="lab">Проясняет цель до просьбы<span class="d">в запросе сказано, зачем нужен результат</span></span><span class="track"><span class="fill" style="width:100%"></span><span class="tickline" style="left:51.1%"></span></span><span class="nums"><b>есть</b> / 51</span></div>
+       не показана: <div class="row down"><span class="lab">Даёт образцы «как надо»<span class="d">показывает пример или планку качества</span></span><span class="track"><span class="fill" style="width:0%"></span><span class="tickline" style="left:41.1%"></span></span><span class="nums">нет / 41</span></div>
 
-     Подписи .lab и базы BQ (проценты Anthropic) по слагам:
-       iter     — Итерирует и уточняет                 85.7
-       goal     — Проясняет цель до просьбы            51.1
-       examples — Даёт образцы «как надо»              41.1
-       format   — Задаёт формат и структуру            30.0
-       mode     — Назначает роль и правила             30.0
-       tone     — Проговаривает тон и стиль            22.7
-       context  — Даёт контекст, которого у модели нет 20.3
-       audience — Называет адресата                    17.6
-       reason   — Оспаривает логику модели             15.8
-       approach — Советуется о подходе до старта       10.1
-       fact     — Проверяет факты и цифры               8.7
+     Подписи .lab, строки-определения DEF и базы BQ (проценты Anthropic) по слагам:
+       iter     — Итерирует и уточняет · первый ответ принимает как черновик и дожимает правками · 85.7
+       goal     — Проясняет цель до просьбы · в запросе сказано, зачем нужен результат · 51.1
+       examples — Даёт образцы «как надо» · показывает пример или планку качества · 41.1
+       format   — Задаёт формат и структуру · называет, в каком виде нужен результат · 30.0
+       mode     — Назначает роль и правила · говорит модели, кем быть и как работать · 30.0
+       tone     — Проговаривает тон и стиль · задаёт голос текста · 22.7
+       context  — Даёт контекст, которого у модели нет · прикладывает свои вводные: файлы, цифры, историю · 20.3
+       audience — Называет адресата · в запросе сказано, для кого результат · 17.6
+       reason   — Оспаривает логику модели · спрашивает основания вывода · 15.8
+       approach — Советуется о подходе до старта · до «сделай» спрашивает, как подойти · 10.1
+       fact     — Проверяет факты и цифры · сверяет руками цифры, даты и названия · 8.7
 ═══ -->
 {{bars_html}}
     </div>
@@ -219,11 +263,69 @@ section.delta:empty{display:none}
 </section>
 
 <section class="col stack">
-  <h2>Что с этим делать</h2>
-  <div class="pitch">
-{{pitch_html}}
-    <a class="cta" href="{{cta_url}}">{{cta_label}}</a>
+  <h2>Что с этим делать: ЛАБС</h2>
+
+  <div class="stack">
+    <h3>Что такое ЛАБС</h3>
+    <p>ЛАБС — четырёхнедельный практикум Мари Афониной по работе с ИИ: свой ИИ-агент, вайбкодинг, свой цифровой продукт. Учёба идёт на твоих задачах. Шесть результатов, с которыми выходят участницы пятого потока:</p>
+    <ul>
+      <li><span class="b">01</span><span>Личный ИИ-сотрудник: агент в Telegram, который помнит всё, делает рутину сам и стоит как подписка.</span></li>
+      <li><span class="b">02</span><span>Свой цифровой продукт — сайт, приложение или бот — собран твоими руками за дни, без программистов.</span></li>
+      <li><span class="b">03</span><span>Рутина делегирована: задачи, которые съедали дни и деньги на подрядчиках, ИИ делает за минуты.</span></li>
+      <li><span class="b">04</span><span>Первые деньги на новом навыке ещё во время курса: продажи, входящие заказы, понятный прайс.</span></li>
+      <li><span class="b">05</span><span>Уверенность «я это сделала»: страх техники сменяется ощущением «мне всё по силам».</span></li>
+      <li><span class="b">06</span><span>ИИ в жизни и семье: боты для детей, документы, меню, здоровье — под управлением твоих агентов.</span></li>
+    </ul>
   </div>
+
+  <div class="stack">
+    <h3>Для кого</h3>
+    <p class="fine">Костяк потока — люди без технического образования, программистов в ЛАБС нет. Узнаешь себя:</p>
+    <ul>
+      <li><span class="b">—</span><span>Эксперты-одиночки: психологи, врачи, коучи, стилисты — вся техника и маркетинг на них самих.</span></li>
+      <li><span class="b">—</span><span>Владелицы онлайн-школ и продюсеры, уставшие от подрядчиков и ручной рутины.</span></li>
+      <li><span class="b">—</span><span>Предприниматели с командой, которым нужен порядок в отчётах и операционке.</span></li>
+      <li><span class="b">—</span><span>Маркетологи и другие специалисты, добавляющие в прайс сайты, ботов и агентов.</span></li>
+      <li><span class="b">—</span><span>Мамы, которые строят операционную систему семьи и учатся урывками.</span></li>
+      <li><span class="b">—</span><span>Продвинутые пользователи ИИ — за средой равных и продажей своих ИИ-услуг.</span></li>
+    </ul>
+  </div>
+
+  <div class="stack">
+    <h3>Что прокачаем именно у тебя</h3>
+    <p class="fine">Каждый пробел из твоего профиля — и чем именно он закрывается в ЛАБС. Цитаты — дословные, из чата пятого потока.</p>
+    <div class="pitch">
+{{pitch_html}}
+    </div>
+<!-- Плейсхолдер labs_gaps_html собирает render.py из labs_map.md: строка на каждую привычку ниже
+     базы (кроме 1–2 уже разобранных в питче выше) и на каждую группу неиспользуемых фишек; шаблоны
+     строк — в render.py (GAP/GAP_F). При сильном профиле первой идёт строка трека «первые деньги». -->
+    <div class="gaps">
+{{labs_gaps_html}}
+    </div>
+  </div>
+
+  <div class="stack">
+    <h3>Что внутри, кроме основной программы</h3>
+<!-- Плейсхолдер labs_courses_html — список мини-курсов платформы (render.py, список COURSES);
+     мини-курсы, закрывающие пробелы этого человека, получают пометку «под твой пробел». -->
+    <ul>
+{{labs_courses_html}}
+    </ul>
+    <div class="pitch">
+      <p>Стоимость: {{price}}, есть рассрочка. Тест бесплатный и полный без покупки; программа и оплата — по кнопке.</p>
+      <a class="cta" href="{{cta_url}}">{{cta_label}}</a>
+    </div>
+  </div>
+</section>
+
+<section class="col stack">
+  <h2>Как пользоваться отчётом</h2>
+  <ul>
+    <li><span class="b">01</span><span>Выбери в профиле одну рыжую привычку. Рыжих нет — возьми ту, где полоса ближе всего к штриху базы.</span></li>
+    <li><span class="b">02</span><span>Неделю добавляй её фразу-шаблон в свои запросы. Фраза в кавычках есть у каждой привычки в разделе «Что мы меряли».</span></li>
+    <li><span class="b">03</span><span>Через месяц напиши в чате «перемерь» — новая страница покажет сдвиг «было → стало».</span></li>
+  </ul>
 </section>
 
 <hr class="col">
