@@ -1,0 +1,239 @@
+<!doctype html>
+<!--
+  ИИ-мастер — страница результата. Шаблон: скилл ядра подставляет данные по плейсхолдерам в двойных фигурных скобках
+  (простая текстовая замена; КАЖДЫЙ плейсхолдер заменять ВО ВСЕХ вхождениях: mode_badge и score11 встречаются дважды).
+
+  Плейсхолдеры:
+    {{ name }}       — имя или ПУСТАЯ строка (тогда двоеточие после имени не рисуется, CSS сам уберёт)
+    {{ mode_badge }} — короткий бейдж метода: «экспресс-тест» | «по реальной истории · 68 диалогов»
+    {{ date }}       — дата замера, «23.08.2026»
+    {{ score11 }}    — целое 0–11
+    {{ score_note }} — подпись под баллом в тайле: авто → «привычек в среднем на диалог»;
+                     квиз → «привычек показано в трёх заданиях»
+    {{ bars_html }}  — 11 строк полос в порядке контракта 1 (шаблон строки — в комментарии перед блоком)
+    {{ features_html }} — элементы списка неиспользуемых фишек (шаблон — в комментарии перед блоком)
+    {{ pitch_html }} — абзацы питча, обычные <p>…</p> (1–3 шт.)
+    {{ cta_label }}  — текст кнопки: «Открыть программу ЛАБС» | для сильного профиля другой CTA
+    {{ cta_url }}    — полная ссылка с UTM
+    {{ delta_html }} — блок «было → стало» при перемере (готовая разметка с своим h2);
+                     при первом замере — ПУСТАЯ строка, секция скроется сама
+
+  Дизайн — система fluency-index (Bitter / Golos Text / JetBrains Mono, светлая+тёмная тема).
+  Шрифты грузятся с Google Fonts; офлайн страница остаётся читабельной на системном стеке.
+-->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ИИ-мастер — результат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F1F3F1; --surface:#FFFFFF; --ink:#141A18; --ink-2:#5C6664; --ink-3:#8A9491;
+  --rule:#DBE0DD; --track:#E4E8E5;
+  --accent:#0D6E60; --accent-ghost:#B7D6CF; --warn:#A9503A; --warn-ghost:#E2C3B8; --tick:#2C3634;
+  --shadow:0 1px 2px rgba(20,26,24,.05), 0 8px 24px -16px rgba(20,26,24,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1211; --surface:#161C1A; --ink:#E6EDEA; --ink-2:#98A3A0; --ink-3:#6E7A77;
+    --rule:#253130; --track:#222B29;
+    --accent:#4FC0AB; --accent-ghost:#1F4C45; --warn:#D9836A; --warn-ghost:#4A2E26; --tick:#C7D2CF;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1211; --surface:#161C1A; --ink:#E6EDEA; --ink-2:#98A3A0; --ink-3:#6E7A77;
+  --rule:#253130; --track:#222B29;
+  --accent:#4FC0AB; --accent-ghost:#1F4C45; --warn:#D9836A; --warn-ghost:#4A2E26; --tick:#C7D2CF;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Golos Text","Helvetica Neue",Arial,sans-serif; font-size:17px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:880px; margin:0 auto; padding:56px 24px 96px; display:flex; flex-direction:column; gap:56px}
+.col{max-width:680px}
+h1,h2,h3{font-family:"Bitter",Georgia,serif; text-wrap:balance; margin:0}
+h1{font-size:clamp(34px,6vw,52px); line-height:1.06; font-weight:700; letter-spacing:-.02em}
+h2{font-size:26px; font-weight:700; line-height:1.2}
+h3{font-size:18px; font-weight:700; line-height:1.3}
+p{margin:0}
+.eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px;
+}
+.eyebrow .badge{display:inline-block; padding:5px 8px 4px; border:1px solid var(--accent); border-radius:3px; color:var(--accent); line-height:1; letter-spacing:.14em}
+.lede{font-size:20px; line-height:1.55; color:var(--ink-2)}
+.nm:not(:empty)::after{content:": "}
+section{display:flex; flex-direction:column; gap:20px}
+.stack{display:flex; flex-direction:column; gap:14px}
+
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+.tile{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:18px 18px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px}
+.tile .k{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.tile .v{font-family:"Bitter",Georgia,serif; font-size:38px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums}
+.tile .v small{font-size:20px; color:var(--ink-3); font-weight:700}
+.tile .v.up{color:var(--accent)}
+.tile .v.txt{font-size:21px; line-height:1.25; letter-spacing:0}
+.tile .n{font-size:14px; color:var(--ink-2); line-height:1.45}
+
+.chart{background:var(--surface); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); overflow:hidden}
+.legend{display:flex; flex-wrap:wrap; gap:6px 22px; padding:16px 20px; border-bottom:1px solid var(--rule); font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11.5px; color:var(--ink-2)}
+.legend i{display:inline-flex; align-items:center; gap:7px; font-style:normal}
+.sw{width:16px; height:9px; border-radius:1px; display:inline-block}
+.sw.solid{background:var(--accent)} .sw.low{background:var(--warn)}
+.sw.tick{width:2px; height:14px; background:var(--tick)}
+.grp{padding:18px 20px 22px}
+.row{display:grid; grid-template-columns:minmax(150px,225px) 1fr 100px; align-items:center; gap:14px; padding:5px 0}
+.row .lab{font-size:14.5px; line-height:1.3}
+.track{position:relative; height:20px; background:var(--track); border-radius:2px}
+.fill{position:absolute; top:0; bottom:0; left:0; border-radius:2px; background:var(--accent)}
+.row.down .fill{background:var(--warn)}
+.row.down .nums{color:var(--warn)}
+.tickline{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--tick); border-radius:1px}
+.nums{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; color:var(--ink-2); white-space:nowrap}
+.nums b{color:var(--ink); font-weight:600}
+@media (max-width:640px){
+  .row{grid-template-columns:1fr 82px; grid-template-areas:"lab nums" "track track"; gap:4px 10px}
+  .row .lab{grid-area:lab} .nums{grid-area:nums} .track{grid-area:track; margin-top:2px}
+}
+
+ul{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:12px}
+li{display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start}
+li .b{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px; font-weight:600; color:var(--accent); padding-top:4px; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+.pitch{background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:4px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
+.pitch p{line-height:1.6}
+.cta{align-self:flex-start; display:inline-block; margin-top:4px; padding:13px 22px; border-radius:4px;
+  background:var(--accent); color:var(--ground); font-weight:600; font-size:16px; text-decoration:none}
+.cta:hover{filter:brightness(1.08)}
+.cta:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+
+.fine{font-size:14px; line-height:1.6; color:var(--ink-2)}
+.fine b{color:var(--ink); font-weight:600}
+code{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.88em; background:var(--track); padding:1px 5px; border-radius:3px}
+a{color:var(--accent); text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+hr{border:0; border-top:1px solid var(--rule); margin:0}
+section.delta:empty{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="col stack">
+  <p class="eyebrow"><span>ИИ-мастер</span><span class="badge">{{mode_badge}}</span><span>{{date}}</span></p>
+  <h1><span class="nm">{{name}}</span>{{score11}} из 11 привычек уверенной работы с&nbsp;ИИ</h1>
+  <p class="lede">Расклад по одиннадцати привычкам из исследования Anthropic: что уже в работе, что даст самый быстрый прирост и какие фишки Claude пока простаивают.</p>
+</header>
+
+<section class="col stack">
+  <div class="tiles">
+    <div class="tile"><span class="k">Твой результат</span><span class="v up">{{score11}}<small> / 11</small></span><span class="n">{{score_note}}</span></div>
+    <div class="tile"><span class="k">База</span><span class="v">3–4<small> / 11</small></span><span class="n">у среднего пользователя — по 9 830 размеченным диалогам исследования Anthropic</span></div>
+    <div class="tile"><span class="k">Метод</span><span class="v txt">{{mode_badge}}</span><span class="n">шкала одна для обоих методов: экспресс-тест ≈ твоя лучшая сессия, по реальной истории — среднее по диалогам</span></div>
+  </div>
+</section>
+
+<section class="stack">
+  <div class="col stack">
+    <h2>Профиль по одиннадцати привычкам</h2>
+    <p class="fine">Полоса — насколько привычка видна у тебя: в замере по реальной истории это доля диалогов, где она встретилась; в экспресс-тесте — показана в заданиях или нет. Штрих — доля диалогов с этой привычкой в исследовании Anthropic. Рыжим — привычки ниже базы.</p>
+  </div>
+
+  <div class="chart">
+    <div class="legend">
+      <i><span class="sw solid"></span>ты, на уровне базы или выше</i>
+      <i><span class="sw low"></span>ты, ниже базы</i>
+      <i><span class="sw tick"></span>база Anthropic</i>
+    </div>
+    <div class="grp">
+<!-- ═══ ШАБЛОН СТРОКИ ПОЛОСЫ для {{ bars_html }} — ровно такая разметка, 11 строк в порядке контракта 1:
+     iter, goal, examples, format, mode, tone, context, audience, reason, approach, fact.
+
+     АВТО-режим (есть habit_rates, RATE — процент пользователя, BASE — база Anthropic из compute.py):
+       <div class="row"><span class="lab">Итерирует и уточняет</span><span class="track"><span class="fill" style="width:82.4%"></span><span class="tickline" style="left:85.7%"></span></span><span class="nums"><b>82</b> / 86</span></div>
+       · класс строки: ниже базы → <div class="row down">, иначе <div class="row">
+       · width полосы = RATE%, left штриха = BASE%, в .nums проценты округлить до целых: <b>RATE</b> / BASE
+
+     КВИЗ-режим (habits только 0/1):
+       показана:    <div class="row"><span class="lab">Проясняет цель до просьбы</span><span class="track"><span class="fill" style="width:100%"></span><span class="tickline" style="left:51.1%"></span></span><span class="nums"><b>есть</b> / 51</span></div>
+       не показана: <div class="row down"><span class="lab">Даёт образцы «как надо»</span><span class="track"><span class="fill" style="width:0%"></span><span class="tickline" style="left:41.1%"></span></span><span class="nums">нет / 41</span></div>
+
+     Подписи .lab и базы BQ (проценты Anthropic) по слагам:
+       iter     — Итерирует и уточняет                 85.7
+       goal     — Проясняет цель до просьбы            51.1
+       examples — Даёт образцы «как надо»              41.1
+       format   — Задаёт формат и структуру            30.0
+       mode     — Назначает роль и правила             30.0
+       tone     — Проговаривает тон и стиль            22.7
+       context  — Даёт контекст, которого у модели нет 20.3
+       audience — Называет адресата                    17.6
+       reason   — Оспаривает логику модели             15.8
+       approach — Советуется о подходе до старта       10.1
+       fact     — Проверяет факты и цифры               8.7
+═══ -->
+{{bars_html}}
+    </div>
+  </div>
+</section>
+
+<!-- Слот «было → стало» (контракт 5): ядро при перемере подставляет сюда ГОТОВЫЙ блок
+     (свой h2 + любая разметка из классов страницы: tiles, chart, row, fine…).
+     Первый замер — подставить ПУСТУЮ строку, секция исчезнет сама (CSS :empty),
+     поэтому плейсхолдер стоит вплотную к тегам секции — не добавляй вокруг него переводы строк. -->
+<section class="col stack delta">{{delta_html}}</section>
+
+<section class="col stack">
+  <h2>Фишки Claude, которые ты не используешь</h2>
+  <p class="fine">Всё это уже встроено в Claude Code и включается парой команд. Каждая фишка закрывает работу, которую сейчас приходится делать руками.</p>
+  <ul>
+<!-- ═══ ШАБЛОН ЭЛЕМЕНТА для {{ features_html }} — по одному <li> на каждую фишку из features_unused,
+     нумерация 01, 02, … по порядку:
+       <li><span class="b">01</span><span><b>Плановые задачи — /schedule</b>. Claude сам запускает рутину по расписанию: утренняя сводка, регулярная проверка, отчёт к понедельнику.</span></li>
+
+     Готовые формулировки по слагам фишек (можно использовать как есть):
+       schedule       — <b>Плановые задачи — /schedule</b>. Claude сам запускает рутину по расписанию: утренняя сводка, регулярная проверка, отчёт к понедельнику.
+       slash-commands — <b>Свои слэш-команды</b>. Запрос, который ты набираешь третий раз, превращается в команду из одного слова.
+       hooks          — <b>Хуки</b>. Правило «каждый раз перед X делай Y» выполняется само — память так не умеет, хук умеет.
+       verification   — <b>Проверка результата</b>. Слово «докажи» заставляет Claude прогнать тест, открыть страницу, показать лог или скрин.
+       code-review    — <b>/code-review и /security-review</b>. Ревью изменений перед выкаткой одной командой.
+       plugins        — <b>Плагины</b>. Свои скиллы и команды раздаются команде одной строкой установки.
+       subagents      — <b>Субагенты</b>. Роль эксперта, которую ты описываешь второй раз, фиксируется файлом и вызывается по имени.
+       mcp            — <b>MCP-серверы</b>. Claude подключается к твоей базе, CRM или API напрямую, без копирования данных в чат.
+       headless       — <b>Headless-режим</b>. <code>claude -p</code> встраивает Claude в скрипты и пайплайны с JSON-выводом.
+       remote-control — <b>Remote Control</b>. Ушёл от компьютера — сессия продолжается, следить можно с телефона.
+       github-actions — <b>GitHub Actions</b>. @claude сам ревьюит пул-реквесты и отвечает в issues.
+       research       — <b>Research-режим</b>. Большое исследование без кода — в claude.ai, с источниками.
+       managed-agents — <b>Managed Agents</b>. Прод-агент с памятью и событиями без самописной обвязки.
+═══ -->
+{{features_html}}
+  </ul>
+</section>
+
+<section class="col stack">
+  <h2>Что с этим делать</h2>
+  <div class="pitch">
+{{pitch_html}}
+    <a class="cta" href="{{cta_url}}">{{cta_label}}</a>
+  </div>
+</section>
+
+<hr class="col">
+
+<section class="col stack">
+  <h3>Приватность и происхождение шкалы</h3>
+  <p class="fine"><b>Замер работал локально: твои диалоги, файлы и результат остаются на этом компьютере, наружу данные не уходят.</b> Из сети эта страница подгружает только шрифты с Google Fonts; карточка для соцсетей собрана полностью офлайн. Цитаты твоих диалогов и секреты не попадают ни на страницу, ни на карточку.</p>
+  <p class="fine">По шкале из исследования Anthropic — <a href="https://academy.claude.com/tutorials/the-ai-fluency-index">Anthropic Education Report: The AI Fluency Index</a> (9 830 размеченных диалогов, январь 2026). Вдохновлено рамкой 4D Рика Дакана и Джозефа Феллера — бесплатный оригинал: <a href="https://academy.claude.com/courses/ai-fluency-framework-foundations">AI Fluency: Framework &amp; Foundations</a> (CC BY-NC-SA 4.0). Тест «ИИ-мастер» — независимый проект; Anthropic его не выпускал и не одобрял.</p>
+</section>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mariafonina-ii-master",
+  "description": "Маркетплейс Мари Афониной: тест «ИИ-мастер» — оцени, как ты работаешь с ИИ, по шкале из исследования Anthropic",
+  "owner": {
+    "name": "Мари Афонина"
+  },
+  "plugins": [
+    {
+      "name": "ii-master",
+      "description": "Тест «ИИ-мастер»: замер навыков работы с ИИ по шкале из исследования Anthropic — 11 привычек по вашей реальной истории диалогов или экспресс-тест, блок неиспользуемых фишек Claude Code, страница результата, карточка для сторис и персональный тренер. Всё считается локально.",
+      "author": {
+        "name": "Мари Афонина"
+      },
+      "source": "./plugins/ii-master",
+      "category": "productivity",
+      "homepage": "https://github.com/mariafonina/ii-master"
+    }
+  ]
+}
