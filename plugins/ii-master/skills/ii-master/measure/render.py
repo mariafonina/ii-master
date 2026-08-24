@@ -19,10 +19,14 @@ SKILL = os.path.dirname(HERE)
 
 # Разметка фрагментов — ровно та, которую ждёт scorecard.html (шаблоны и подписи
 # продублированы в HTML-комментариях самого шаблона; менять здесь и там вместе).
-ROW = ('<div class="row{down}"><span class="lab">{lab}<span class="d">{defn}</span></span>'
+# Статус строки профиля: на уровне базы и выше → {mark} = залитая галка .okic, {chip} пуст;
+# ниже базы → класс .down (тёплая подложка строки), {mark} пуст, {chip} = залитый бейдж «пробел».
+ROW = ('<div class="row{down}"><span class="lab">{mark}{lab}{chip}<span class="d">{defn}</span></span>'
        '<span class="track"><span class="fill" style="width:{width}%"></span>'
        '<span class="tickline" style="left:{base}%"></span></span>'
        '<span class="nums">{nums}</span></div>')
+ROW_OK = '<span class="okic">✓</span>'
+ROW_BAD = ' <span class="chip bad">пробел</span>'
 BAR_LABELS = {"iter": "Итерирует и уточняет", "goal": "Проясняет цель до просьбы",
               "examples": "Даёт образцы «как надо»", "format": "Задаёт формат и структуру",
               "mode": "Назначает роль и правила", "tone": "Проговаривает тон и стиль",
@@ -47,7 +51,8 @@ FLI = '<li><span class="b">{nn}</span><span>{text}</span></li>'
 # ── Блок «ЛАБС» ─────────────────────────────────────────────────────────────────
 # Строки «пробел → чем закрывается в ЛАБС → цитата» render.py собирает из labs_map.md:
 # у привычек и групп фишек читаются поля «**Куда ведёт в ЛАБС:**» и «**Кейс:**» (контракт полей).
-GAP = ('<div class="gap"><p><b>{name}</b> <span class="miss">{miss}</span> — в ЛАБС: {lead}</p>'
+# Чипы статусов — залитые классы страницы: .chip.good / .chip.bad / .chip.info.
+GAP = ('<div class="gap"><p><b>{name}</b> <span class="chip bad">{miss}</span> — в ЛАБС: {lead}</p>'
       '<p class="q">{case}</p></div>')
 GAP_F = ('<div class="gap"><p><b>Фишки без дела: {names}</b> — в ЛАБС: {lead}</p>'
          '<p class="q">{case}</p></div>')
@@ -56,8 +61,8 @@ GAP_S = ('<div class="gap"><p><b>Трек «первые деньги»</b> — 
          '— девять каналов первых заказов.</p></div>')
 CRS = '<li><span class="b">{nn}</span><span><b>{title}</b> · {n}{yours}{tag}</span></li>'
 CRS_REST = '<li><span class="b">—</span><span>и ещё {n_word}: {names}.</span></li>'
-CRS_TAG = ' <em class="tag">под твой пробел</em>'
-CRS_YOURS = ' <em class="tag">прямо про твой инструмент</em>'
+CRS_TAG = ' <em class="chip bad">под твой пробел</em>'
+CRS_YOURS = ' <em class="chip info">прямо про твой инструмент</em>'
 # База мини-курсов платформы — реальные категории и числа уроков из снимка Потока 5 от
 # 24.08.2026 (агент-API платформы; см. раздел «База платформы» в program.md — менять вместе).
 # Первые три категории — про Claude Code, инструмент аудитории теста: флаг yours=True даёт
@@ -127,12 +132,12 @@ def parse_labs_map(path):
 # ── Программа ЛАБС-6 против истории (КОНТРАКТ 6) ────────────────────────────────
 # Пункты — из program.md (снимок лендинга, обновляется вручную); отметки — из полей
 # program_used / program_gaps result.json. Шаблоны согласованы с CSS scorecard.html
-# (.prog / .pgrp / .pitem); плашки «уже делаешь» и «пробел» — классы .tag и .miss страницы.
+# (.prog / .pgrp / .pitem); плашки «уже делаешь» и «пробел» — залитые чипы .chip.good / .chip.bad.
 P_GRP = '<div class="pgrp"><p class="pw">{week}</p>\n{items}</div>'
 P_OK = ('<div class="pitem"><span class="pm">✓</span><span><b>{name}</b> — {does} '
-        '<em class="tag">уже делаешь</em></span></div>')
+        '<em class="chip good">уже делаешь</em></span></div>')
 P_GAP = ('<div class="pitem down"><span class="pm">—</span><span><b>{name}</b> — {does} '
-         '<span class="miss">пробел</span></span></div>')
+         '<span class="chip bad">пробел</span></span></div>')
 P_NC = '<div class="pitem"><span class="pm">·</span><span><b>{name}</b> — {does}</span></div>'
 
 
@@ -378,7 +383,8 @@ def main():
             pct = max(0, min(100, rate))
             nums = f"<b>{rate:.0f}</b> / {base:.0f}"
             cls = "above" if shown else "below"
-        bars.append(ROW.format(down="" if shown else " down", lab=BAR_LABELS[slug], defn=DEFS[slug],
+        bars.append(ROW.format(down="" if shown else " down", mark=ROW_OK if shown else "",
+                               chip="" if shown else ROW_BAD, lab=BAR_LABELS[slug], defn=DEFS[slug],
                                width=f"{pct:.1f}".rstrip("0").rstrip("."), base=f"{base:.1f}".rstrip("0").rstrip("."),
                                nums=nums))
         per[f"rate_{slug}"] = fmt_pct(rate) if not quiz else ("есть" if shown else "нет")
@@ -488,6 +494,7 @@ def main():
         "score_note": score_note,
         "score_tile_k": score_tile_k,
         "above_base": str(above_base),
+        "gaps_n": str(len(HABITS) - above_base),   # светофор «Пробелы: M» в «Итоге замера»
         "above_tile_cls": above_tile_cls,
         "profile_note": profile_note,
         "composite_pct": "—" if r.get("composite_pct") is None else f"{r['composite_pct']:.1f}".replace(".", ",") + "%",

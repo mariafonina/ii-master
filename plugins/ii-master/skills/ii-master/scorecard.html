@@ -54,8 +54,9 @@
     {{ delta_html }} — блок «было → стало» при перемере (готовая разметка с своим h2);
                      при первом замере — ПУСТАЯ строка, секция скроется сама
 
-  Дизайн — система fluency-index (Bitter / Golos Text / JetBrains Mono, светлая+тёмная тема).
-  Шрифты грузятся с Google Fonts; офлайн страница остаётся читабельной на системном стеке.
+  Дизайн — система fluency-index (Bitter / Golos Text, светлая+тёмная тема; моноширинный —
+  только системный стек у путей/команд в code). Шрифты грузятся с Google Fonts; офлайн
+  страница остаётся читабельной на системном стеке.
 -->
 <html lang="ru">
 <head>
@@ -65,12 +66,14 @@
 <title>ИИ-мастер — результат</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Golos+Text:wght@400;500;600&display=swap">
 <style>
 :root{
   --ground:#F1F3F1; --surface:#FFFFFF; --ink:#141A18; --ink-2:#5C6664; --ink-3:#8A9491;
   --rule:#DBE0DD; --track:#E4E8E5;
   --accent:#0D6E60; --accent-ghost:#B7D6CF; --warn:#A9503A; --warn-ghost:#E2C3B8; --tick:#2C3634;
+  /* текст на заливках и подложка «пробела»: контраст проверен ≥4.5:1 (белый/#0D6E60 = 6.15, белый/#A9503A = 5.39, #A9503A/#F5EAE7 = 4.57) */
+  --on-accent:#FFFFFF; --on-warn:#FFFFFF; --bad-wash:#F5EAE7;
   --shadow:0 1px 2px rgba(20,26,24,.05), 0 8px 24px -16px rgba(20,26,24,.25);
 }
 @media (prefers-color-scheme: dark){
@@ -78,6 +81,8 @@
     --ground:#0E1211; --surface:#161C1A; --ink:#E6EDEA; --ink-2:#98A3A0; --ink-3:#6E7A77;
     --rule:#253130; --track:#222B29;
     --accent:#4FC0AB; --accent-ghost:#1F4C45; --warn:#D9836A; --warn-ghost:#4A2E26; --tick:#C7D2CF;
+    /* контраст ≥4.5:1: #0E1211/#4FC0AB = 8.50, #0E1211/#D9836A = 6.65, #D9836A/#312A25 = 4.97 */
+    --on-accent:#0E1211; --on-warn:#0E1211; --bad-wash:#312A25;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
   }
 }
@@ -85,6 +90,7 @@
   --ground:#0E1211; --surface:#161C1A; --ink:#E6EDEA; --ink-2:#98A3A0; --ink-3:#6E7A77;
   --rule:#253130; --track:#222B29;
   --accent:#4FC0AB; --accent-ghost:#1F4C45; --warn:#D9836A; --warn-ghost:#4A2E26; --tick:#C7D2CF;
+  --on-accent:#0E1211; --on-warn:#0E1211; --bad-wash:#312A25;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
@@ -101,12 +107,14 @@ h1{font-size:clamp(34px,6vw,52px); line-height:1.06; font-weight:700; letter-spa
 h2{font-size:26px; font-weight:700; line-height:1.2}
 h3{font-size:18px; font-weight:700; line-height:1.3}
 p{margin:0}
+/* Служебная гарнитура страницы одна — Golos Text (никакого моноширинного в интерфейсных
+   подписях, JetBrains Mono убран по фидбеку); uppercase остаётся, разрядка умеренная. */
 .eyebrow{
-  font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; font-weight:600;
-  letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+  font-family:"Golos Text","Helvetica Neue",Arial,sans-serif; font-size:11.5px; font-weight:600;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); font-variant-numeric:tabular-nums;
   display:flex; align-items:center; flex-wrap:wrap; gap:10px;
 }
-.eyebrow .badge{display:inline-block; padding:5px 8px 4px; border:1px solid var(--accent); border-radius:3px; color:var(--accent); line-height:1; letter-spacing:.14em}
+.eyebrow .badge{display:inline-block; padding:5px 8px 4px; border:1px solid var(--accent); border-radius:3px; color:var(--accent); line-height:1; letter-spacing:.07em}
 .lede{font-size:20px; line-height:1.55; color:var(--ink-2)}
 .nm:not(:empty)::after{content:": "}
 section{display:flex; flex-direction:column; gap:20px}
@@ -114,7 +122,7 @@ section{display:flex; flex-direction:column; gap:20px}
 
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
 .tile{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:18px 18px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px}
-.tile .k{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3)}
+.tile .k{font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
 .tile .v{font-family:"Bitter",Georgia,serif; font-size:38px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums}
 .tile .v small{font-size:20px; color:var(--ink-3); font-weight:700}
 .tile .v.up{color:var(--accent)}
@@ -123,22 +131,29 @@ section{display:flex; flex-direction:column; gap:20px}
 .tile.off{display:none}
 
 .chart{background:var(--surface); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); overflow:hidden}
-.legend{display:flex; flex-wrap:wrap; gap:6px 22px; padding:16px 20px; border-bottom:1px solid var(--rule); font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11.5px; color:var(--ink-2)}
+.legend{display:flex; flex-wrap:wrap; gap:6px 22px; padding:16px 20px; border-bottom:1px solid var(--rule); font-size:12.5px; font-weight:500; color:var(--ink-2)}
 .legend i{display:inline-flex; align-items:center; gap:7px; font-style:normal}
 .sw{width:16px; height:9px; border-radius:1px; display:inline-block}
 .sw.solid{background:var(--accent)} .sw.low{background:var(--warn)}
 .sw.tick{width:2px; height:14px; background:var(--tick)}
-.grp{padding:18px 20px 22px}
-.row{display:grid; grid-template-columns:minmax(150px,225px) 1fr 100px; align-items:center; gap:14px; padding:5px 0}
+.grp{padding:18px 14px 22px}
+/* Статус строки читается тремя каналами сразу: подложка строки (пробел — тёплая), маркер
+   (залитая галка у сильных, залитый бейдж «ПРОБЕЛ» у слабых) и цвет значения процента. */
+.row{display:grid; grid-template-columns:minmax(150px,225px) 1fr 100px; align-items:center; gap:14px; padding:6px 8px; border-radius:4px}
+.row.down{background:var(--bad-wash)}
 .row .lab{font-size:14.5px; line-height:1.3}
 .row .lab .d{display:block; font-size:12px; line-height:1.35; color:var(--ink-2); margin-top:1px}
+.okic{display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px;
+  border-radius:50%; background:var(--accent); color:var(--on-accent); font-size:10px; font-weight:700;
+  line-height:1; margin-right:7px; vertical-align:-2px}
 .track{position:relative; height:20px; background:var(--track); border-radius:2px}
 .fill{position:absolute; top:0; bottom:0; left:0; border-radius:2px; background:var(--accent)}
 .row.down .fill{background:var(--warn)}
-.row.down .nums{color:var(--warn)}
+.row.down .track{background:color-mix(in srgb, var(--warn) 14%, var(--track))}
 .tickline{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--tick); border-radius:1px}
-.nums{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; color:var(--ink-2); white-space:nowrap}
-.nums b{color:var(--ink); font-weight:600}
+.nums{font-size:13px; font-weight:500; font-variant-numeric:tabular-nums; text-align:right; color:var(--ink-2); white-space:nowrap}
+.nums b{color:var(--accent); font-weight:600}
+.row.down .nums,.row.down .nums b{color:var(--warn); font-weight:600}
 @media (max-width:640px){
   .row{grid-template-columns:1fr 82px; grid-template-areas:"lab nums" "track track"; gap:4px 10px}
   .row .lab{grid-area:lab} .nums{grid-area:nums} .track{grid-area:track; margin-top:2px}
@@ -146,32 +161,44 @@ section{display:flex; flex-direction:column; gap:20px}
 
 ul{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:12px}
 li{display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start}
-li .b{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:12px; font-weight:600; color:var(--accent); padding-top:4px; font-variant-numeric:tabular-nums; white-space:nowrap}
+li .b{font-size:12.5px; font-weight:600; color:var(--accent); padding-top:3px; font-variant-numeric:tabular-nums; letter-spacing:.04em; white-space:nowrap}
 
 .pitch{background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:4px; padding:22px 24px; display:flex; flex-direction:column; gap:14px; box-shadow:var(--shadow)}
 .pitch p{line-height:1.6}
 blockquote{margin:0; padding-left:14px; border-left:2px solid var(--rule); color:var(--ink-2); font-size:15px; line-height:1.55}
 .gaps{display:flex; flex-direction:column; gap:14px}
 .gap{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:14px 18px 15px; display:flex; flex-direction:column; gap:8px}
-.gap .miss,.pitem .miss{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--warn); white-space:nowrap}
 .prog{background:var(--surface); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow); padding:20px 20px 24px; display:flex; flex-direction:column; gap:18px}
 .pgrp{display:flex; flex-direction:column; gap:4px}
-.pw{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px}
+.pw{font-size:11.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px; font-variant-numeric:tabular-nums}
 .pitem{display:grid; grid-template-columns:20px 1fr; gap:10px; align-items:start; font-size:15px; line-height:1.5; padding:2px 0}
-.pitem .pm{font-family:"JetBrains Mono",ui-monospace,monospace; font-weight:600; color:var(--accent); padding-top:1px; text-align:center}
+.pitem .pm{font-weight:700; color:var(--accent); padding-top:1px; text-align:center}
 .pitem.down .pm{color:var(--warn)}
 .gap .q{font-size:14px; line-height:1.55; color:var(--ink-2)}
-.tag{font-family:"JetBrains Mono",ui-monospace,monospace; font-style:normal; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); border:1px solid var(--accent-ghost); border-radius:3px; padding:2px 6px 1px; white-space:nowrap}
+/* Чипы статусов — ЗАЛИТЫЕ, семантика цветов одна на всю страницу:
+   зелёный (.chip.good) = уже сильное/уже делаешь, тёплый красный (.chip.bad) = пробел/зона роста,
+   нейтральный (.chip.info) = информационная пометка. Контраст текста на заливках ≥4.5:1
+   в обеих темах — пары посчитаны в комментарии у токенов :root. */
+.chip{display:inline-block; font-style:normal; font-size:10.5px; font-weight:600; letter-spacing:.07em;
+  text-transform:uppercase; border-radius:3px; padding:3px 7px 2px; line-height:1.2; white-space:nowrap; vertical-align:1px}
+.chip.good{background:var(--accent); color:var(--on-accent)}
+.chip.bad{background:var(--warn); color:var(--on-warn)}
+.chip.info{background:var(--track); color:var(--ink)}
+/* Светофор под тайлами «Итога замера»: крупная сводка сильное/пробелы. */
+.verdict{display:flex; gap:10px; flex-wrap:wrap; margin-top:2px}
+.vd{font-size:19px; font-weight:600; line-height:1; padding:11px 16px 10px; border-radius:4px; font-variant-numeric:tabular-nums}
+.vd.good{background:var(--accent); color:var(--on-accent)}
+.vd.bad{background:var(--warn); color:var(--on-warn)}
 .ask-btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:2px}
 .abtn{display:inline-block; padding:12px 20px; border-radius:4px;
-  background:var(--accent); color:var(--ground); font-weight:600; font-size:15px; text-decoration:none}
+  background:var(--accent); color:var(--on-accent); font-weight:600; font-size:15px; text-decoration:none}
 a.abtn:hover{filter:brightness(1.08)}
 a.abtn:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
-.abtn.plain{background:transparent; color:var(--ink-2); border:1px dashed var(--ink-3); font-weight:500}
 
 .fine{font-size:14px; line-height:1.6; color:var(--ink-2)}
 .fine b{color:var(--ink); font-weight:600}
-code{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.88em; background:var(--track); padding:1px 5px; border-radius:3px}
+/* моноширинный остаётся только у путей и команд (code) — системный стек, без веб-шрифта */
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.88em; background:var(--track); padding:1px 5px; border-radius:3px}
 a{color:var(--accent); text-underline-offset:3px}
 a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
 hr{border:0; border-top:1px solid var(--rule); margin:0}
@@ -221,6 +248,9 @@ section.delta:empty,.prog:empty,p.fine:empty{display:none}
     <div class="tile{{above_tile_cls}}"><span class="k">Выше среднего пользователя</span><span class="v">{{above_base}}<small> / 11</small></span><span class="n">привычек встречаются у тебя чаще, чем у среднего пользователя, — это зелёные полосы в профиле ниже</span></div>
     <div class="tile"><span class="k">База</span><span class="v">3–4<small> / 11</small></span><span class="n">столько привычек набирает средний пользователь за один диалог — по 9 830 размеченным диалогам исследования Anthropic</span></div>
   </div>
+  <!-- Светофор: {{above_base}} = привычки на уровне базы и выше (зелёные строки профиля),
+       {{gaps_n}} = 11 − above_base (рыжие строки). Подставляет render.py. -->
+  <div class="verdict"><span class="vd good">Сильное: {{above_base}}</span><span class="vd bad">Пробелы: {{gaps_n}}</span></div>
   <p class="fine">Метод: {{mode_badge}}.</p>
   <p class="fine"><a href="#zayavka">{{ask_label}} ↓</a></p>
 </section>
@@ -242,15 +272,18 @@ section.delta:empty,.prog:empty,p.fine:empty{display:none}
      iter, goal, examples, format, mode, tone, context, audience, reason, approach, fact.
      Внутри .lab после названия — строка-определение <span class="d">…</span> (тексты DEF — в таблице ниже,
      те же, что в секции «Что мы меряли» и в DEFS render.py; менять во всех местах вместе).
+     Маркеры статуса: строка на уровне базы и выше начинается залитой галкой <span class="okic">✓</span>,
+     строка ниже базы получает класс .down (тёплая подложка) и залитый бейдж <span class="chip bad">пробел</span>
+     после названия; значение процента в .nums красится в цвет статуса (CSS).
 
      АВТО-режим (есть habit_rates, RATE — процент пользователя, BASE — база Anthropic из compute.py):
-       <div class="row"><span class="lab">Итерирует и уточняет<span class="d">первый ответ принимает как черновик и дожимает правками</span></span><span class="track"><span class="fill" style="width:82.4%"></span><span class="tickline" style="left:85.7%"></span></span><span class="nums"><b>82</b> / 86</span></div>
+       <div class="row"><span class="lab"><span class="okic">✓</span>Итерирует и уточняет<span class="d">первый ответ принимает как черновик и дожимает правками</span></span><span class="track"><span class="fill" style="width:82.4%"></span><span class="tickline" style="left:85.7%"></span></span><span class="nums"><b>82</b> / 86</span></div>
        · класс строки: ниже базы → <div class="row down">, иначе <div class="row">
        · width полосы = RATE%, left штриха = BASE%, в .nums проценты округлить до целых: <b>RATE</b> / BASE
 
      КВИЗ-режим (habits только 0/1):
-       показана:    <div class="row"><span class="lab">Проясняет цель до просьбы<span class="d">в запросе сказано, зачем нужен результат</span></span><span class="track"><span class="fill" style="width:100%"></span><span class="tickline" style="left:51.1%"></span></span><span class="nums"><b>есть</b> / 51</span></div>
-       не показана: <div class="row down"><span class="lab">Даёт образцы «как надо»<span class="d">показывает пример или планку качества</span></span><span class="track"><span class="fill" style="width:0%"></span><span class="tickline" style="left:41.1%"></span></span><span class="nums">нет / 41</span></div>
+       показана:    <div class="row"><span class="lab"><span class="okic">✓</span>Проясняет цель до просьбы<span class="d">в запросе сказано, зачем нужен результат</span></span><span class="track"><span class="fill" style="width:100%"></span><span class="tickline" style="left:51.1%"></span></span><span class="nums"><b>есть</b> / 51</span></div>
+       не показана: <div class="row down"><span class="lab">Даёт образцы «как надо» <span class="chip bad">пробел</span><span class="d">показывает пример или планку качества</span></span><span class="track"><span class="fill" style="width:0%"></span><span class="tickline" style="left:41.1%"></span></span><span class="nums">нет / 41</span></div>
 
      Подписи .lab, строки-определения DEF и базы BQ (проценты Anthropic) по слагам:
        iter     — Итерирует и уточняет · первый ответ принимает как черновик и дожимает правками · 85.7

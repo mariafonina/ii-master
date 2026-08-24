@@ -7,8 +7,9 @@
          python3 build_assets.py --no-fonts — только QR (например, без сети)
          python3 build_assets.py --no-qr    — только шрифты
 
-Шрифты: сабсеты cyrillic + latin с Google Fonts (Bitter 700, Golos Text 400–600 переменный, JetBrains Mono 600).
-Все три под SIL OFL 1.1 — встраивание разрешено. Скачанные файлы кэшируются в системной temp-папке.
+Шрифты: сабсеты cyrillic + latin с Google Fonts (Bitter 700, Golos Text 400–600 переменный;
+JetBrains Mono убран по дизайн-фидбеку — служебные подписи карточки набраны Golos Text).
+Оба под SIL OFL 1.1 — встраивание разрешено. Скачанные файлы кэшируются в системной temp-папке.
 Нужна сеть (или кэш). Без сети шрифты не встраиваются, блок остаётся пустым, страница работает на системном стеке.
 
 QR: библиотека qrcode (pip install qrcode pillow). Если её нет — блок остаётся пустым, карточка выходит без QR.
@@ -19,7 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, "..", "assets", "share-card-template.html")
 
 CSS_URL = ("https://fonts.googleapis.com/css2?family=Bitter:wght@700"
-           "&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap")
+           "&family=Golos+Text:wght@400;500;600&display=swap")
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/126.0.0.0 Safari/537.36")  # с таким UA Google Fonts отдаёт woff2 и unicode-range
 SUBSETS = ("cyrillic", "latin")
