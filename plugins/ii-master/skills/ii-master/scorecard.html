@@ -22,26 +22,33 @@
     {{ pitch_html }} — абзацы питча по 1–2 зонам роста, обычные <p>…</p> + <blockquote> (вступление
                      части «Что прокачаем именно у тебя»)
     {{ program_note }} — подпись блока «Программа ЛАБС-6 против твоей истории»: авто → «по твоей
-                     реальной истории сессий», квиз → «по ответам в чек-листе», пустые
-                     program_used/program_gaps → «не проверяли»
+                     реальной истории сессий», квиз → «по ответам в чек-листе»; пустые
+                     program_used/program_gaps → блок свёрнут в одну строку «Чек-лист программы
+                     пропущен — пройди перемер, и раздел заполнится» (каталог без отметок не идёт)
     {{ program_html }} — пункты программы группами по неделям с отметками ✓ «уже делаешь» /
-                     «пробел»; собирает render.py из program.md + result.json (КОНТРАКТ 6)
-    {{ program_date }} — дата снимка программы из program.md
+                     «пробел»; собирает render.py из program.md + result.json (КОНТРАКТ 6);
+                     при свёрнутом блоке — ПУСТАЯ строка (CSS прячет пустой .prog, поэтому
+                     плейсхолдер стоит вплотную к тегам — переводы строк вокруг не добавлять)
+    {{ program_foot }} — подпись «Программа — снимок лендинга от …»; при свёрнутом блоке — пустая
     {{ labs_gaps_html }} — строки «пробел → чем закрывается в ЛАБС → цитата» по остальным привычкам
-                     ниже базы, пробелам программы (без цитат) и группам неиспользуемых фишек;
-                     собирает render.py из labs_map.md
+                     ниже базы и группам неиспользуемых фишек; собирает render.py из labs_map.md
+                     (пробелы программы карточками не дублируются — они видны в блоке программы)
     {{ labs_courses_html }} — категории базы мини-курсов платформы с числом уроков (снимок
-                     Потока 5); первые три — «прямо про твой инструмент», закрывающие пробелы
-                     программы — «под твой пробел»
-    {{ price }}      — цена из config.md, стоит один раз у кнопок заявки (в питче цену не называть)
-    {{ ask_label }}  — призыв заявки из config.md: «Подать заявку на участие»
-    {{ ask_wa_url }} — ссылка WhatsApp менеджеру: wa.me с текстом заявки, балл уже подставлен
-    {{ ask_tg_url }} — ссылка Telegram менеджеру по нику (текст заявки человек вставляет сам)
-    {{ ask_max_html }} — третья кнопка: пока у менеджера нет ника в MAX — <span class="abtn plain">
-                     с текстом max_hint из config.md; появился ник — render.py подставит
-                     <a class="abtn" href="https://max.ru/<ник>">MAX</a>
-    {{ ask_prefill }} — текст заявки с баллом («…мой результат — X из 11…») — показывается рядом
-                     с кнопками для тех, кто пишет в Telegram или MAX руками
+                     Потока 5); строками — только разделы с пометками «прямо про твой инструмент»
+                     и «под твой пробел», остальные одной строкой «и ещё N разделов: …»
+    {{ price }}, {{ price_installment }}, {{ defense_date }} — цена, платёж рассрочки и дата
+                     защиты из config.md; стоят один раз у кнопок заявки (в питче цену не называть)
+    {{ ask_label }}  — призыв заявки из config.md («Подать заявку в ЛАБС 6»); стоит ТРИЖДЫ:
+                     якорь после «Итога замера», заголовок блока заявки, sticky-полоса внизу
+    {{ ask_tg_url }} — ПЕРВАЯ кнопка: t.me/<ник>?text=… — официальные клиенты Telegram
+                     подставляют текст заявки черновиком в поле ввода
+    {{ ask_wa_url }} — вторая кнопка: wa.me с тем же текстом заявки
+    {{ ask_max_btn }} — третья кнопка ТОЛЬКО при нике менеджера в MAX (config: max_username):
+                     <a class="abtn" href="https://max.ru/<ник>">MAX</a>; ника нет — пустая строка
+    {{ max_note_html }} — строка под кнопками, пока ника в MAX нет: <p class="fine"> с текстом
+                     max_hint из config.md («Пользуешься только MAX? …»); есть ник — пустая строка
+    {{ ask_prefill }} — текст заявки (балл, метод, зона роста, имя) — показывается рядом
+                     с кнопками, чтобы человек видел, что уйдёт первым сообщением
     {{ manager_name }}, {{ manager_phone }} — подпись под кнопками: «Катя, менеджер ЛАБС · +7 …»
                      (чекаут-ссылка из config.md — резерв, на страницу не выводится)
     {{ delta_html }} — блок «было → стало» при перемере (готовая разметка с своим h2);
@@ -81,6 +88,7 @@
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0; background:var(--ground); color:var(--ink);
   font-family:"Golos Text","Helvetica Neue",Arial,sans-serif; font-size:17px; line-height:1.62;
@@ -167,7 +175,14 @@ code{font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.88em; backg
 a{color:var(--accent); text-underline-offset:3px}
 a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
 hr{border:0; border-top:1px solid var(--rule); margin:0}
-section.delta:empty{display:none}
+section.delta:empty,.prog:empty,p.fine:empty{display:none}
+/* Sticky-полоса заявки: появляется после первого экрана, прячется, когда блок заявки виден сам
+   (логику даёт короткий скрипт в конце страницы; без JS полоса просто не показывается). */
+.stickybar{position:fixed; left:0; right:0; bottom:0; z-index:20; display:flex; justify-content:center;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--surface);
+  border-top:1px solid var(--rule); box-shadow:0 -8px 24px -16px rgba(0,0,0,.35)}
+.stickybar[hidden]{display:none}
+.stickybar .abtn{padding:10px 26px}
 </style>
 </head>
 <body>
@@ -176,7 +191,7 @@ section.delta:empty{display:none}
 <header class="col stack">
   <p class="eyebrow"><span>ИИ-мастер</span><span class="badge">{{mode_badge}}</span><span>{{date}}</span></p>
   <h1><span class="nm">{{name}}</span>{{score11}} из 11 привычек {{score_caption}}</h1>
-  <p class="lede">Одиннадцать привычек уверенной работы с&nbsp;ИИ — по шкале из исследования Anthropic. Сначала — что это за привычки, дальше твой итог, профиль по каждой из них и фишки Claude, которые пока простаивают.</p>
+  <p class="lede">Средний пользователь из исследования Anthropic показывает 3–4 привычки за диалог. Ниже — твой профиль по всем одиннадцати и фишки Claude, которые у тебя простаивают.</p>
 </header>
 
 <!-- Определения привычек — статичный текст, порядок = контракт 1 (как у полос профиля).
@@ -206,7 +221,8 @@ section.delta:empty{display:none}
     <div class="tile{{above_tile_cls}}"><span class="k">Выше среднего пользователя</span><span class="v">{{above_base}}<small> / 11</small></span><span class="n">привычек встречаются у тебя чаще, чем у среднего пользователя, — это зелёные полосы в профиле ниже</span></div>
     <div class="tile"><span class="k">База</span><span class="v">3–4<small> / 11</small></span><span class="n">столько привычек набирает средний пользователь за один диалог — по 9 830 размеченным диалогам исследования Anthropic</span></div>
   </div>
-  <p class="fine">Метод: {{mode_badge}}. Шкала одна для обоих методов: экспресс-тест ≈ твоя лучшая сессия, замер по реальной истории — среднее по всем диалогам.</p>
+  <p class="fine">Метод: {{mode_badge}}.</p>
+  <p class="fine"><a href="#zayavka">{{ask_label}} ↓</a></p>
 </section>
 
 <section class="stack">
@@ -260,6 +276,18 @@ section.delta:empty{display:none}
      поэтому плейсхолдер стоит вплотную к тегам секции — не добавляй вокруг него переводы строк. -->
 <section class="col stack delta">{{delta_html}}</section>
 
+<!-- Активационный блок стоит сразу после профиля (до фишек и продающих секций):
+     сначала бесплатная польза, потом продажа. В конце — мостик к заявке. -->
+<section class="col stack" id="nedelya">
+  <h2>Что сделать на этой неделе</h2>
+  <ul>
+    <li><span class="b">01</span><span>Выбери в профиле одну рыжую привычку. Рыжих нет — возьми ту, где полоса ближе всего к штриху базы.</span></li>
+    <li><span class="b">02</span><span>Неделю добавляй её фразу-шаблон в свои запросы. Фраза в кавычках есть у каждой привычки в разделе «Что мы меряли».</span></li>
+    <li><span class="b">03</span><span>Через месяц напиши в чате «перемерь» — новая страница покажет сдвиг «было → стало».</span></li>
+  </ul>
+  <p class="fine">Шаги выше бесплатные, и их хватит для роста. В ЛАБС тот же путь проходят за четыре недели на своём проекте — <a href="#zayavka">заявка у Кати ниже</a>.</p>
+</section>
+
 <section class="col stack">
   <h2>Фишки Claude, которые ты не используешь</h2>
   <p class="fine">Всё это уже встроено в Claude Code и включается парой команд. Каждая фишка закрывает работу, которую сейчас приходится делать руками.</p>
@@ -289,15 +317,16 @@ section.delta:empty{display:none}
 
 <!-- Программа ЛАБС-6 против истории (КОНТРАКТ 6). Пункты и дату снимка render.py берёт из
      program.md (обновляется с лендинга вручную), отметки — из program_used/program_gaps
-     result.json; при пустых полях блок выходит без отметок с подписью «не проверяли».
+     result.json. При пустых полях (чек-лист квиза пропущен) блок СВЁРНУТ: program_note — одна
+     строка «Чек-лист программы пропущен — пройди перемер, и раздел заполнится», program_html и
+     program_foot пустые (каталог без отметок не показывается; CSS прячет пустые контейнеры,
+     поэтому плейсхолдеры стоят вплотную к тегам — переводы строк вокруг них не добавлять).
      Шаблоны строк P_GRP/P_OK/P_GAP/P_NC — в render.py, классы .prog/.pgrp/.pw/.pitem — выше. -->
 <section class="col stack">
   <h2>Программа ЛАБС-6 против твоей истории</h2>
   <p class="fine">{{program_note}}</p>
-  <div class="prog">
-{{program_html}}
-  </div>
-  <p class="fine">Программа — снимок лендинга от {{program_date}}; актуальная версия — на странице курса.</p>
+  <div class="prog">{{program_html}}</div>
+  <p class="fine">{{program_foot}}</p>
 </section>
 
 <section class="col stack">
@@ -314,6 +343,8 @@ section.delta:empty{display:none}
       <li><span class="b">05</span><span>Уверенность «я это сделала»: страх техники сменяется ощущением «мне всё по силам».</span></li>
       <li><span class="b">06</span><span>ИИ в жизни и семье: боты для детей, документы, меню, здоровье — под управлением твоих агентов.</span></li>
     </ul>
+    <!-- Money-кейс для всех профилей (цитата дословная, из labs_map.md, msg #7409). -->
+    <blockquote>«В процессе разработки получила 2 заказа, поэтому сделала демо» — Elena, участница ЛАБС 5, про своё приложение личных финансов.</blockquote>
   </div>
 
   <div class="stack">
@@ -345,35 +376,34 @@ section.delta:empty{display:none}
 
   <div class="stack">
     <h3>Что внутри, кроме основной программы</h3>
-    <p class="fine">В базе платформы — 110+ мини-курсов в 11 разделах (снимок Потока 5 от 24.08.2026). Первые три раздела — прямо про Claude Code, в котором ты работаешь.</p>
+    <p class="fine">В базе платформы — 110+ мини-курсов и 14 эфиров потока. Три раздела — прямо про Claude Code, в котором ты работаешь.</p>
 <!-- Плейсхолдер labs_courses_html — категории базы платформы с числом уроков (render.py,
-     список CATS; менять вместе со снимком в program.md и строкой выше). Первые три — пометка
-     «прямо про твой инструмент»; категории, закрывающие пробелы программы этого человека,
-     получают пометку «под твой пробел». -->
+     список CATS; менять вместе со снимком в program.md). Строками — только разделы с пометками
+     «прямо про твой инструмент» (первые три) и «под твой пробел» (закрывают пробелы программы
+     этого человека); остальные render.py сворачивает в одну строку «и ещё N разделов: …». -->
     <ul>
 {{labs_courses_html}}
     </ul>
-    <div class="pitch">
-      <p>Стоимость: {{price}}, есть рассрочка. Тест бесплатный и полный без покупки.</p>
-      <p><b>{{ask_label}}</b> — напиши Кате в любой из трёх каналов, она ответит на вопросы и поможет с оплатой:</p>
+    <p class="fine">Разделы и числа уроков — снимок базы Потока 5 от 24.08.2026.</p>
+<!-- Блок заявки менеджеру — единственный CTA страницы; якорь #zayavka ведут сюда ссылка после
+     «Итога замера», мостик из «Что сделать на этой неделе» и sticky-полоса. Telegram — первая
+     кнопка (у аудитории Claude Code стоит Telegram Desktop, текст заявки подставляется в поле
+     ввода через t.me/<ник>?text=…); WhatsApp — вторая; MAX без ника в ряд не идёт — только
+     строкой {{max_note_html}} под кнопками. -->
+    <div class="pitch" id="zayavka">
+      <p>Стоимость: {{price}} или {{price_installment}} в рассрочку. Тест бесплатный и полный без покупки. Ближайшая защита проектов — {{defense_date}}; Катя подскажет, с какого дня сможешь начать.</p>
+      <p><b>{{ask_label}}</b> — напиши Кате, она ответит на вопросы и поможет с оплатой:</p>
       <div class="ask-btns">
-        <a class="abtn" href="{{ask_wa_url}}">WhatsApp</a>
         <a class="abtn" href="{{ask_tg_url}}">Telegram</a>
-        {{ask_max_html}}
+        <a class="abtn" href="{{ask_wa_url}}">WhatsApp</a>
+        {{ask_max_btn}}
       </div>
       <p class="fine">{{manager_name}}, менеджер ЛАБС · {{manager_phone}}</p>
-      <p class="fine">В WhatsApp текст заявки подставится сам. Пишешь в Telegram или MAX — отправь его первым сообщением: «{{ask_prefill}}»</p>
+      <p class="fine">Текст заявки подставится в сообщение сам — останется нажать «отправить»: «{{ask_prefill}}»</p>
+      <p class="fine">Приложи карточку результата — Катя сразу увидит твой профиль.</p>
+      {{max_note_html}}
     </div>
   </div>
-</section>
-
-<section class="col stack">
-  <h2>Как пользоваться отчётом</h2>
-  <ul>
-    <li><span class="b">01</span><span>Выбери в профиле одну рыжую привычку. Рыжих нет — возьми ту, где полоса ближе всего к штриху базы.</span></li>
-    <li><span class="b">02</span><span>Неделю добавляй её фразу-шаблон в свои запросы. Фраза в кавычках есть у каждой привычки в разделе «Что мы меряли».</span></li>
-    <li><span class="b">03</span><span>Через месяц напиши в чате «перемерь» — новая страница покажет сдвиг «было → стало».</span></li>
-  </ul>
 </section>
 
 <hr class="col">
@@ -382,8 +412,26 @@ section.delta:empty{display:none}
   <h3>Приватность и происхождение шкалы</h3>
   <p class="fine"><b>Замер работал локально: твои диалоги, файлы и результат остаются на этом компьютере, наружу данные не уходят.</b> Из сети эта страница подгружает только шрифты с Google Fonts; карточка для соцсетей собрана полностью офлайн. Цитаты твоих диалогов и секреты не попадают ни на страницу, ни на карточку.</p>
   <p class="fine">По шкале из исследования Anthropic — <a href="https://academy.claude.com/tutorials/the-ai-fluency-index">Anthropic Education Report: The AI Fluency Index</a> (9 830 размеченных диалогов, январь 2026). Вдохновлено рамкой 4D Рика Дакана и Джозефа Феллера — бесплатный оригинал: <a href="https://academy.claude.com/courses/ai-fluency-framework-foundations">AI Fluency: Framework &amp; Foundations</a> (CC BY-NC-SA 4.0). Тест «ИИ-мастер» — независимый проект; Anthropic его не выпускал и не одобрял.</p>
+  <p class="fine" id="fin">Страница сохранена: <code>~/.claude/ii-master-result.html</code>. Открыть снова — скажи в Claude Code: «открой мой результат ИИ-мастер».</p>
 </section>
 
 </div>
+
+<!-- Sticky-полоса заявки: видна после первого экрана и прячется, когда блок #zayavka на экране.
+     Ссылка та же, что у якоря после «Итога замера»; без JS полоса остаётся скрытой (hidden). -->
+<div class="stickybar" id="stickybar" hidden>
+  <a class="abtn" href="#zayavka">{{ask_label}}</a>
+</div>
+<script>
+(function(){
+  var bar=document.getElementById('stickybar'),ask=document.getElementById('zayavka'),
+      top=document.querySelector('header');
+  if(!bar||!ask||!top||!('IntersectionObserver' in window))return;
+  var past=false,askOnScreen=false;
+  function upd(){bar.hidden=!past||askOnScreen;}
+  new IntersectionObserver(function(e){past=!e[0].isIntersecting;upd();}).observe(top);
+  new IntersectionObserver(function(e){askOnScreen=e[0].isIntersecting;upd();}).observe(ask);
+})();
+</script>
 </body>
 </html>
