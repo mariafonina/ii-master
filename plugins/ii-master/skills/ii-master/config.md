@@ -33,7 +33,7 @@ imya_testa: ИИ-мастер
 - Профиль не сильный и `growth` пуст (все привычки на уровне базы) — питч собирается по
   неиспользуемым фишкам, `utm_content=tools`.
 
-Пример: `https://pay.labsme.ru/labs-6-kurs?utm_source=fluency-test&utm_medium=plugin&utm_campaign=labs6&utm_content=examples`
+Пример: `https://pay.labsme.ru/labs-6-kurs?utm_source=ii-master&utm_medium=plugin&utm_campaign=labs6&utm_content=examples`
 
 ## Что где используется
 
