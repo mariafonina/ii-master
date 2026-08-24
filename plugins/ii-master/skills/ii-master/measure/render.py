@@ -54,22 +54,32 @@ GAP_F = ('<div class="gap"><p><b>Фишки без дела: {names}</b> — в 
 GAP_S = ('<div class="gap"><p><b>Трек «первые деньги»</b> — в ЛАБС: {lead} Материалы трека: каталог '
          '«Способы зарабатывать на ИИ» с вилками цен с эфиров и PDF «Как участницы находили клиентов» '
          '— девять каналов первых заказов.</p></div>')
-CRS = '<li><span class="b">{nn}</span><span><b>{title}</b> — {desc}.{tag}</span></li>'
+CRS = '<li><span class="b">{nn}</span><span><b>{title}</b> · {n}{yours}{tag}</span></li>'
 CRS_TAG = ' <em class="tag">под твой пробел</em>'
-# Мини-курсы платформы (названия сверены по чату 5 потока); третий столбец — слаги пробелов
-# (привычки, фишки и program-слаги КОНТРАКТА 6), при пересечении с пробелами человека курс
-# получает пометку «под твой пробел».
-# "strong" — служебный маркер: подсветка только у сильного профиля (score11 >= 8).
-COURSES = [
-    ("Предобучение", "стартовая неделя до основного курса: доступы, сервисы, первые шаги без спешки", set()),
-    ("Мини-курс «Агенты для новичков»", "свой первый ИИ-агент по шагам",
-     {"iter", "goal", "format", "mode", "tone", "context", "schedule", "slash-commands", "hooks", "plugins", "agent"}),
-    ("«Шаблоны ИИ-агентов» — мини-курс по агентам OpenClaw и Hermes", "готовые шаблоны своих агентов и работа связками",
-     {"subagents", "headless", "managed-agents", "github-actions", "remote-control", "mcp", "mcp-bot"}),
-    ("Мини-курс по Telegram мини-приложению", "своё приложение прямо в Telegram",
-     {"audience", "approach", "examples", "miniapp"}),
-    ("Мини-курс по оплатам", "приём оплат в своём продукте", {"strong", "payments"}),
-    ("Вебинар «ИИ в жизни»", "ИИ для семьи, быта и личных задач", set()),
+CRS_YOURS = ' <em class="tag">прямо про твой инструмент</em>'
+# База мини-курсов платформы — реальные категории и числа уроков из снимка Потока 5 от
+# 24.08.2026 (агент-API платформы; см. раздел «База платформы» в program.md — менять вместе).
+# Первые три категории — про Claude Code, инструмент аудитории теста: флаг yours=True даёт
+# пометку «прямо про твой инструмент». Четвёртый столбец — program-слаги КОНТРАКТА 6:
+# пересечение с пробелами человека даёт пометку «под твой пробел» (маппинг — из program.md);
+# "strong" — служебный маркер, подсветка только у сильного профиля (score11 >= 8).
+# Последние две строки — вне 11 категорий: эфиры потока (research/packaging) и платёжные
+# системы (payments) — новинка 6 потока, в снимке Потока 5 своей категории ещё нет.
+CATS = [
+    ("Claude Code", "3 урока", True, set()),
+    ("Claude Cowork", "8 уроков", True, set()),
+    ("АГЕНТ НА CLAUDE для продвинутых, терминал", "12 уроков, включая MCP-интеграции", True, {"mcp-bot"}),
+    ("АГЕНТ НА CLAUDE для новичков", "16 уроков", False, {"agent"}),
+    ("АГЕНТ НА GPT для новичков", "16 уроков", False, {"agent"}),
+    ("Агенты. Openclaw & Hermes", "15 уроков", False, {"agent"}),
+    ("Предобучение", "14 уроков", False, set()),
+    ("ИИ Дизайн", "10 уроков", False, {"design"}),
+    ("ИИ-верстка и дизайн-макеты Claude Design", "7 уроков", False, {"typography"}),
+    ("Мини-апп в Telegram", "5 уроков", False, {"miniapp"}),
+    ("Дополнительные уроки", "4 урока: GetCourse, лендинги, Оберег", False, {"site"}),
+    ("Эфиры потока", "14 эфиров: архитектура проекта, лендинг, воронка продаж, работа с клиентами, разборы трудностей",
+     False, {"research", "packaging"}),
+    ("Платёжные системы", "новинка 6 потока", False, {"payments", "strong"}),
 ]
 
 
@@ -132,7 +142,7 @@ def parse_program(path):
     dm = re.search(r"\*\*Дата снимка:\*\*\s*([0-9.]+)", txt)
     if dm:
         out["date"] = dm.group(1).strip(".")
-    for m in re.finditer(r"^### +([a-z][a-z-]*) — ([^\n]+)\n(.*?)(?=^### |\Z)", txt, re.M | re.S):
+    for m in re.finditer(r"^### +([a-z][a-z-]*) — ([^\n]+)\n(.*?)(?=^### |^## |\Z)", txt, re.M | re.S):
         slug, name, body = m.group(1), m.group(2).strip(), m.group(3)
         wk = re.search(r"\*\*Неделя:\*\*\s*([^\n]+)", body)
         ds = re.search(r"\*\*Что делают:\*\*\s*(.*?)\n[ \t]*\n", body, re.S)
@@ -227,11 +237,13 @@ def labs_gaps_block(r, quiz, strong_profile, pitch_nonempty, bar_labels, prog):
 
 
 def labs_courses_block(gap_slugs):
-    """{{labs_courses_html}}: мини-курсы; пересёкся с пробелами человека — пометка «под твой пробел»."""
+    """{{labs_courses_html}}: категории базы платформы (CATS); пересечение с пробелами
+    человека — пометка «под твой пробел», первые три — «прямо про твой инструмент»."""
     items = []
-    for i, (title, desc, slugs) in enumerate(COURSES, 1):
-        tag = CRS_TAG if slugs & gap_slugs else ""
-        items.append(CRS.format(nn=f"{i:02d}", title=title, desc=desc, tag=tag))
+    for i, (title, n, yours, slugs) in enumerate(CATS, 1):
+        items.append(CRS.format(nn=f"{i:02d}", title=title, n=n,
+                                yours=CRS_YOURS if yours else "",
+                                tag=CRS_TAG if slugs & gap_slugs else ""))
     return "\n".join(items)
 FEATURE_ITEMS = {
     "schedule": "<b>Плановые задачи — /schedule</b>. Claude сам запускает рутину по расписанию: утренняя сводка, регулярная проверка, отчёт к понедельнику.",
@@ -411,13 +423,14 @@ def main():
     prog = parse_program(os.path.join(SKILL, "program.md"))
     program_html, program_note = program_block(r, prog, quiz)
 
-    # Блок «ЛАБС»: строки по всем пробелам человека из labs_map.md + мини-курсы с подсветкой.
-    gap_slugs = ({s for s in HABITS if not habits.get(s)} | set(r.get("features_unused") or [])
-                 | set(r.get("program_gaps") or []))
+    # Блок «ЛАБС»: строки по всем пробелам человека из labs_map.md + категории с подсветкой.
+    # Подсветку категорий дают ТОЛЬКО пробелы программы (+ strong): слаг research есть и у фишек
+    # Claude, и в программе — фишки в маппинге категорий не участвуют, иначе ложная подсветка.
+    cat_slugs = set(r.get("program_gaps") or [])
     if strong_profile:
-        gap_slugs.add("strong")
+        cat_slugs.add("strong")
     labs_gaps_html = labs_gaps_block(r, quiz, strong_profile, bool(pitch.strip()), BAR_LABELS, prog)
-    labs_courses_html = labs_courses_block(gap_slugs)
+    labs_courses_html = labs_courses_block(cat_slugs)
 
     # CTA страницы — заявка менеджеру (блок «Менеджер продаж» в config.md).
     # Ссылку WhatsApp render строит сам из manager_prefill (гарантия URL-кодировки);
