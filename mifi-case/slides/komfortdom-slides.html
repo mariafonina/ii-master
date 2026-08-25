@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>КомфортДом — слайды</title>
+<style>
+  :root{
+    --ink:#1E2430; --muted:#5B6472; --faint:#8A93A3;
+    --accent:#2456A6; --accent-dk:#1B4585; --accent-bg:#EBF1FA; --accent-bd:#BCCFE9;
+    --red:#A93226; --red-bg:#FBEDEA; --red-bd:#E5B7AE;
+    --green:#1E6B43; --green-bg:#E9F5EE; --green-bd:#BCDDC9;
+    --amber:#8A5A00; --amber-bg:#FBF3E2; --amber-bd:#E5D2A3;
+    --panel:#F4F6F9; --line:#D9DEE6; --bg:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:1280px 720px;margin:0}
+  html,body{background:#fff}
+  body{font-family:'Liberation Sans','DejaVu Sans',sans-serif;color:var(--ink);
+       -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .slide{width:1280px;height:720px;overflow:hidden;position:relative;background:var(--bg);
+         padding:32px 40px 30px;page-break-after:always}
+  .slide:last-child{page-break-after:auto}
+
+  /* header */
+  .khead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+  h1{font-size:26px;font-weight:800;letter-spacing:.2px}
+  .kchip{font-size:10px;font-weight:700;color:var(--accent);border:1px solid var(--accent-bd);
+         background:var(--accent-bg);border-radius:10px;padding:3px 10px;white-space:nowrap;margin-top:3px}
+  .mainmsg{font-size:17.5px;font-weight:700;border-left:4px solid var(--accent);
+           padding:3px 0 3px 10px;margin:6px 0 12px;color:var(--ink)}
+  .seclab{font-size:12px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin:6px 0 7px}
+  .seclab.red{color:var(--red)} .seclab.green{color:var(--green)} .seclab.accent{color:var(--accent)}
+
+  /* footer */
+  .foot{position:absolute;left:40px;right:40px;bottom:10px;display:flex;justify-content:space-between;
+        font-size:9.5px;color:var(--faint)}
+
+  /* ===== SLIDE 1 ===== */
+  .s1{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0}
+  .s1 .over{font-size:15px;font-weight:700;letter-spacing:6px;color:var(--muted)}
+  .s1 .prog{font-size:14.5px;color:var(--muted);margin-top:14px;line-height:1.45}
+  .s1 .rule{width:64px;height:3px;background:var(--accent);border-radius:2px;margin:30px auto 26px}
+  .s1 .case{font-size:37px;font-weight:800;line-height:1.2;max-width:900px}
+  .s1 .uk{font-size:17px;font-weight:700;color:var(--accent);margin-top:12px}
+  .s1 .fio{font-size:19px;font-weight:700;margin-top:44px}
+  .s1 .date{font-size:13px;color:var(--muted);margin-top:8px}
+  .s1 .epi{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:11.5px;
+           font-style:italic;color:var(--faint)}
+
+  /* ===== SLIDE 2 ===== */
+  .loss{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .loss .card{background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:12px 14px 11px}
+  .loss .num{font-size:32px;font-weight:800;color:var(--red);line-height:1.05}
+  .loss .ttl{font-size:15px;font-weight:800;margin-top:4px;letter-spacing:.2px}
+  .loss .sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .srcline{font-size:12.5px;color:var(--muted);margin:10px 0 12px}
+  .srcline b{color:var(--ink)}
+  .invhead{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px}
+  .nstar{font-size:12px;font-weight:700;color:var(--green);background:var(--green-bg);
+         border:1px solid var(--green-bd);border-radius:10px;padding:4px 12px}
+  .chains{display:flex;flex-direction:column;gap:10px}
+  .chain{display:grid;grid-template-columns:1.12fr 26px 1fr 26px 1.05fr;align-items:stretch;gap:0}
+  .chain .cell{border-radius:7px;padding:9px 12px;font-size:13px;line-height:1.32}
+  .chain .mech{background:var(--accent-bg);border:1px solid var(--accent-bd)}
+  .chain .mech b{font-size:13.5px}
+  .chain .metr{background:var(--panel);border:1px solid var(--line)}
+  .chain .metr .big{font-size:18px;font-weight:800}
+  .chain .metr .sm{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .chain .money{background:var(--green-bg);border:1px solid var(--green-bd)}
+  .chain .money .big{font-size:18px;font-weight:800;color:var(--green)}
+  .chain .money .sm{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.3}
+  .chain .arr{display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--faint)}
+  .guards{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:12px;margin-top:14px}
+  .guards .g{font-size:12.5px;line-height:1.38;color:var(--ink);background:var(--panel);
+             border:1px solid var(--line);border-radius:7px;padding:10px 12px}
+  .guards .g b{display:block;font-size:12.5px;margin-bottom:2px}
+  .guards .g .redline{color:var(--red);font-weight:700}
+
+  /* ===== SLIDE 3 ===== */
+  .s3grid{display:grid;grid-template-columns:47fr 53fr;gap:18px;height:576px}
+  table.data{width:100%;border-collapse:collapse;font-size:11.5px}
+  table.data th{background:var(--panel);border:1px solid var(--line);padding:5px 7px;text-align:left;
+                font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+  table.data td{border:1px solid var(--line);padding:5px 7px;vertical-align:top;line-height:1.32}
+  .yes,.no{display:inline-block;font-size:9.5px;font-weight:800;border-radius:8px;padding:1px 7px}
+  .yes{color:var(--green);background:var(--green-bg);border:1px solid var(--green-bd)}
+  .no{color:var(--red);background:var(--red-bg);border:1px solid var(--red-bd)}
+  .panelbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:8px}
+  .panelbox ul{list-style:none}
+  .panelbox li{font-size:11.5px;line-height:1.38;margin:4px 0;padding-left:11px;position:relative}
+  .panelbox li:before{content:"▪";position:absolute;left:0;color:var(--accent);font-size:8px;top:2px}
+  .plaq{background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:6px;
+        font-size:12px;font-weight:700;color:var(--accent-dk);padding:7px 10px;margin-top:7px;line-height:1.32}
+  .forbid{background:var(--red-bg);border:1px solid var(--red-bd)}
+  .forbid li:before{content:"✕";color:var(--red);font-size:9px;top:1px}
+  /* flow scheme */
+  .flow{display:flex;flex-direction:column;height:100%;}
+  .fnode{border-radius:7px;text-align:center;padding:4px 8px;line-height:1.25}
+  .fplain{font-weight:800;font-size:13px}
+  .fplain .rep{display:block;font-weight:400;font-style:italic;font-size:10px;color:var(--muted)}
+  .fwide{background:var(--panel);border:1px solid var(--line);font-weight:800;font-size:12px}
+  .fwide small,.fbot small{display:block;font-weight:400;font-size:9.5px;color:var(--muted)}
+  .frobot{background:var(--accent);color:#fff;font-weight:800;font-size:12.5px;border:1px solid var(--accent-dk)}
+  .frobot small{display:block;font-weight:400;font-size:9.5px;color:#D8E4F5}
+  .fchan{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .fchan .fnode{background:#fff;border:1px solid var(--line);font-size:10.5px;font-weight:700;padding:3px 4px}
+  .fchan small{display:block;font-weight:400;font-size:9px;color:var(--muted)}
+  .fbr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .fred{background:var(--red-bg);border:1px solid var(--red-bd);font-size:10.5px;font-weight:700;color:var(--red)}
+  .fred small{display:block;color:var(--muted);font-weight:400;font-size:9px}
+  .fok{background:#fff;border:1px solid var(--line);font-size:10.5px;font-weight:700}
+  .fok small{display:block;color:var(--muted);font-weight:400;font-size:9px}
+  .famber{background:var(--amber-bg);border:1px solid var(--amber-bd);font-size:10.5px;font-weight:700;color:var(--amber)}
+  .famber small{display:block;color:var(--muted);font-weight:400;font-size:9px}
+  .fgrn{background:var(--green-bg);border:1px solid var(--green-bd);font-size:10.5px;font-weight:700;color:var(--green)}
+  .fgrn small{display:block;color:var(--muted);font-weight:400;font-size:9px}
+  .fbot{background:var(--green);color:#fff;font-weight:800;font-size:12.5px}
+  .fbot small{color:#D6EBDD}
+  .farr{display:flex;align-items:center;justify-content:center;color:var(--faint);
+        font-size:11px;line-height:1;flex:1 1 6px;min-height:6px}
+  .farr2{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1 1 6px;min-height:6px}
+  .farr2 span{display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px}
+
+  /* ===== SLIDE 4 ===== */
+  .tl{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .tl .mcol{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+  .tl .mh{background:var(--accent);color:#fff;font-weight:800;font-size:12.5px;padding:5px 9px}
+  .tl .mh small{font-weight:400;font-size:10px;color:#CFDCF0;margin-left:4px}
+  .tl .mdo{padding:6px 9px;font-size:10.5px;line-height:1.3;flex:1}
+  .tl .mwho{background:var(--accent-bg);border-top:1px solid var(--accent-bd);padding:4px 9px;
+            font-size:10.5px;line-height:1.28;min-height:50px}
+  .tl .mwho b{color:var(--accent-dk)}
+  .tl .mgate{border-top:1px dashed var(--line);padding:4px 9px;font-size:10.2px;color:var(--green);
+             font-weight:700;line-height:1.26;min-height:34px}
+  .tlnote{font-size:10.4px;color:var(--muted);margin:6px 0 9px;line-height:1.36}
+  .s4mid{display:grid;grid-template-columns:56fr 44fr;gap:16px;margin-top:4px}
+  table.risk{width:100%;border-collapse:collapse;font-size:11px}
+  table.risk td{border:1px solid var(--line);padding:4px 6px;line-height:1.28;vertical-align:top}
+  table.risk td:first-child{font-weight:700;width:37%}
+  table.risk tr td:first-child:before{content:"⚠ ";color:var(--red);font-weight:400}
+  .money3{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:10px}
+  .mcard{border-radius:8px;padding:9px 11px;font-size:11px;line-height:1.32}
+  .mcard h4{font-size:11px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+  .mcard .n{font-size:19px;font-weight:800;line-height:1.1}
+  .m-red{background:var(--red-bg);border:1px solid var(--red-bd)} .m-red h4,.m-red .n{color:var(--red)}
+  .m-grn{background:var(--green-bg);border:1px solid var(--green-bd)} .m-grn h4,.m-grn .n{color:var(--green)}
+  .m-acc{background:var(--accent-bg);border:1px solid var(--accent-bd)} .m-acc h4,.m-acc .n{color:var(--accent-dk)}
+  .abline{font-size:10.4px;color:var(--muted);margin-top:7px;line-height:1.36}
+  .scale{display:grid;grid-template-columns:1fr 30px 1.25fr 30px 1.45fr;align-items:stretch;margin-top:6px}
+  .scale .st{border-radius:8px;padding:9px 12px;font-size:11.5px;line-height:1.32}
+  .scale .st b{display:block;font-size:13px}
+  .st1{background:var(--panel);border:1px solid var(--line)}
+  .st2{background:var(--accent-bg);border:1px solid var(--accent-bd)}
+  .st2 b{color:var(--accent-dk)}
+  .st3{background:var(--accent);border:1px solid var(--accent-dk);color:#E8EFF9}
+  .st3 b{color:#fff}
+  .scale .sar{display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--faint)}
+  .whynow{font-size:11.2px;margin-top:7px}
+  .whynow b{color:var(--accent-dk)}
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1 ============ -->
+<section class="slide s1">
+  <div class="over">ВСТУПИТЕЛЬНОЕ ИСПЫТАНИЕ</div>
+  <div class="prog">Программа «Управление внедрением искусственного интеллекта в бизнес»<br>совместно со Школой 21</div>
+  <div class="rule"></div>
+  <div class="case">«Предиктивная аналитика обращений<br>в управляющую компанию»</div>
+  <div class="uk">УК «КомфортДом»</div>
+  <div class="fio">Афонина Мария Дмитриевна</div>
+  <div class="date">25 августа 2026 г.</div>
+  <div class="epi">Модель — датчик. Проект — про изменение процесса.</div>
+</section>
+
+<!-- ============ SLIDE 2 ============ -->
+<section class="slide">
+  <div class="khead">
+    <h1>Бизнес-цели и показатели успеха</h1>
+    <div class="kchip">критерий К1</div>
+  </div>
+  <div class="mainmsg">УК уже теряет на этих проблемах до ~30 млн ₽ в год. Проект за 2,5 млн бьёт прямо по этим потерям — и вот как.</div>
+
+  <div class="seclab red">Сколько теряем сейчас</div>
+  <div class="loss">
+    <div class="card">
+      <div class="num">~20–30 млн ₽/год</div>
+      <div class="ttl">Повторные выезды</div>
+      <div class="sub">чиним одно и то же по два раза</div>
+    </div>
+    <div class="card">
+      <div class="num">~4–5 млн ₽/год</div>
+      <div class="ttl">Ручная сортировка</div>
+      <div class="sub">~5 диспетчеров заняты раскидыванием заявок руками</div>
+    </div>
+    <div class="card">
+      <div class="num">−7 млн ₽/год</div>
+      <div class="ttl">Уход домов</div>
+      <div class="sub">каждый дом, ушедший к другой УК после собрания собственников</div>
+    </div>
+  </div>
+  <div class="srcline">Откуда берутся потери — исходные цифры кейса: <b>14 000</b> обращений/мес · <b>71%</b> сортируется вручную · ответ <b>2,5 часа</b> · <b>16%</b> жалоб возвращаются · <b>11%</b> злых оценок</div>
+
+  <div class="invhead">
+    <div class="seclab green" style="margin:0">Вложение: 2,5 млн ₽ за 5 месяцев — вот как оно бьёт по потерям</div>
+    <div class="nstar">Главная цифра: решено с первого раза и без злой оценки — 75% → 80%</div>
+  </div>
+  <div class="chains">
+    <div class="chain">
+      <div class="cell mech"><b>Робот предсказывает «жалоба вернётся»</b> — рисковую заявку нельзя закрыть без проверки</div>
+      <div class="arr">→</div>
+      <div class="cell metr"><span class="big">повторы: 16% → 12%</span><div class="sm">исчезает каждый 4-й повтор</div></div>
+      <div class="arr">→</div>
+      <div class="cell money"><span class="big">−6,0 млн ₽/год</span><div class="sm">лишних выездов больше нет</div></div>
+    </div>
+    <div class="chain">
+      <div class="cell mech"><b>Робот сортирует заявки сам</b> — ставит тему и срочность, передаёт нужному мастеру</div>
+      <div class="arr">→</div>
+      <div class="cell metr"><span class="big">ручная сортировка: 71% → 30%</span></div>
+      <div class="arr">→</div>
+      <div class="cell money"><span class="big">−1,7 млн ₽/год</span><div class="sm">2+ человека уходят с рутины на сервис</div></div>
+    </div>
+    <div class="chain">
+      <div class="cell mech"><b>Робот отвечает сразу и сам говорит статус</b> («придём завтра в 10»)</div>
+      <div class="arr">→</div>
+      <div class="cell metr"><span class="big">ответ: 2,5 ч → до 1 ч</span><div class="sm">в чате — сразу; злые оценки 11% → 8,5%. Считаем «9 из 10 быстрее часа» — среднее прячет ждавших 6 часов</div></div>
+      <div class="arr">→</div>
+      <div class="cell money"><span class="big">дома не уходят</span><div class="sm">жильцы не копят злость к собранию: −7 млн ₽ за дом не случается</div></div>
+    </div>
+  </div>
+
+  <div class="seclab" style="margin-top:18px">Предохранители — и почему цифрам можно верить</div>
+  <div class="guards">
+    <div class="g"><b>Аварии — без ИИ.</b> «Прорвало», «газ», «человек в лифте» решают железные правила. Робот может только повысить срочность. <span class="redline">Пропуск аварии ≤0,5% — красная линия.</span></div>
+    <div class="g"><b>Меряем честно.</b> Если всегда говорить «жалоба не вернётся» — угадаешь в 84% случаев, а пользы ноль. Поэтому робот обязан ловить повторы минимум в 2,5 раза лучше простого правила.</div>
+    <div class="g"><b>Цели не с потолка.</b> Лучшая автоматизация Москвы — ~30% заявок; точность госсистемы Минюста — 0,84–0,89. Обещаем столько же, не сказки.</div>
+  </div>
+
+  <div class="foot"><span>Сначала порядок, потом робот · Робот может только повышать срочность · Предсказание без действия не стоит ничего</span><span>2 / 4</span></div>
+</section>
+
+<!-- ============ SLIDE 3 ============ -->
+<section class="slide">
+  <div class="khead">
+    <h1>Данные, технологии и ограничения</h1>
+    <div class="kchip">критерий К2</div>
+  </div>
+  <div class="mainmsg">Мозги берём готовые и дешёвые, данные жильцов не выпускаем из России, к 3-му месяцу — своя модель, чтобы ни от кого не зависеть.</div>
+
+  <div class="s3grid">
+    <div>
+      <div class="seclab">Что у нас есть</div>
+      <table class="data">
+        <tr><th style="width:27%">Что</th><th style="width:12%">Есть?</th><th>В чём загвоздка и что делаем</th></tr>
+        <tr><td><b>История обращений</b></td><td><span class="yes">да</span></td><td>темы записаны вразнобой → робот наведёт порядок в категориях</td></tr>
+        <tr><td><b>Заявки и их статусы</b></td><td><span class="yes">да</span></td><td>повторы не помечены → вычисляем правилом: тот же адрес + та же тема в течение месяца</td></tr>
+        <tr><td><b>Оценки жильцов</b></td><td><span class="yes">да</span></td><td>ставят в основном сердитые → делаем поправку</td></tr>
+        <tr><td><b>Записи звонков</b></td><td><span class="no">нет</span></td><td>включаем запись (с предупреждением в трубке), звонок сам превращается в текст — 60 коп./мин</td></tr>
+      </table>
+
+      <div class="seclab" style="margin-top:9px">Чем система думает и сколько это стоит</div>
+      <div class="panelbox" style="margin-top:0">
+        <ul>
+          <li>Готовая модель <b>DeepSeek на серверах Яндекса в России</b> — данные жильцов страну не покидают. Все 14 000 обращений/мес ≈ <b>17 тыс. ₽</b> + <b>19 тыс. ₽</b> за расшифровку звонков</li>
+          <li>Предсказатель повторов — не «нейросеть-фантазёр», а счётчик закономерностей: повторы по адресу, сорванные сроки, ошибки бригад</li>
+          <li>К 3-му месяцу — <b>своя маленькая модель</b>, обученная на наших примерах: работает на обычном сервере, не зависим ни от одного поставщика</li>
+        </ul>
+        <div class="plaq">ИИ-инфраструктура — меньше 2% бюджета. Деньги проекта уходят людям и на интеграцию, а не «на ИИ»</div>
+      </div>
+
+      <div class="seclab" style="margin-top:9px">Что нельзя</div>
+      <div class="panelbox forbid" style="margin-top:0">
+        <ul>
+          <li>Данные жильцов — только Россия. Утечка = штраф 3–15 млн ₽, повторная — до 3% выручки</li>
+          <li>Зарубежным умным моделям — только тексты без имён, телефонов и адресов</li>
+          <li>Авариями ИИ не управляет — только железные правила</li>
+        </ul>
+      </div>
+    </div>
+
+    <div>
+      <div class="seclab accent">Путь одной заявки</div>
+      <div class="flow" style="height:548px">
+        <div class="fnode fplain">ЖИЛЕЦ <span class="rep">«капает кран», «не греет батарея»</span></div>
+        <div class="farr2" style="grid-template-columns:1fr 1fr 1fr"><span>▼</span><span>▼</span><span>▼</span></div>
+        <div class="fchan">
+          <div class="fnode">Звонок<small>запись → текст</small></div>
+          <div class="fnode">Бот в MAX<small>кнопки, адрес из профиля</small></div>
+          <div class="fnode">Сайт / личный кабинет<small>чат-помощник</small></div>
+        </div>
+        <div class="farr">▼</div>
+        <div class="fnode fwide">ОДНО ОКНО ПРИЁМА<small>всё падает в одну общую очередь</small></div>
+        <div class="farr">▼</div>
+        <div class="fnode frobot">РОБОТ-СОРТИРОВЩИК<small>читает каждое обращение</small></div>
+        <div class="farr2"><span>▼</span><span>▼</span></div>
+        <div class="fbr">
+          <div class="fnode fred">«Прорвало», «газ», «человек в лифте» → АВАРИЙНАЯ БРИГАДА, СРАЗУ<small>железные правила; ИИ не имеет права понизить срочность</small></div>
+          <div class="fnode fok">Обычная заявка<small>робот сам ставит категорию и срочность → передаёт нужному мастеру</small></div>
+        </div>
+        <div class="farr">▼</div>
+        <div class="fnode fwide">МАСТЕР ЧИНИТ<small>бот в любой момент сам отвечает жильцу, где его заявка</small></div>
+        <div class="farr">▼</div>
+        <div class="fnode frobot">РОБОТ-ПРЕДСКАЗАТЕЛЬ<small>«вернётся ли жалоба?»</small></div>
+        <div class="farr2"><span>▼</span><span>▼</span></div>
+        <div class="fbr">
+          <div class="fnode famber">Риск высокий — закрыть нельзя<small>сначала контрольный звонок или фото работы</small></div>
+          <div class="fnode fgrn">Риск низкий<small>заявка закрыта</small></div>
+        </div>
+        <div class="farr">▼</div>
+        <div class="fnode fbot">ДОВОЛЬНЫЙ ЖИЛЕЦ<small>меньше повторов → меньше злых оценок → дом не уходит к другой УК</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><span>Сначала порядок, потом робот · Робот может только повышать срочность · Предсказание без действия не стоит ничего</span><span>3 / 4</span></div>
+</section>
+
+<!-- ============ SLIDE 4 ============ -->
+<section class="slide">
+  <div class="khead">
+    <h1>План внедрения, риски и экономический эффект</h1>
+    <div class="kchip">критерий К3</div>
+  </div>
+  <div class="mainmsg">Первые результаты — через 3 недели, окупаемость — к 10-му месяцу; оплата подрядчика — только за пройденные точки.</div>
+
+  <div class="tl">
+    <div class="mcol">
+      <div class="mh">М1 <small>недели 1–4</small></div>
+      <div class="mdo">Наводим порядок + быстрые победы без ИИ: автоподтверждение заявки, правила аварий, SLA-таймер, запись звонков, бот MAX</div>
+      <div class="mwho"><b>Все ЖК</b> — безопасные улучшения сразу для всех</div>
+      <div class="mgate">✓ данные проверены; через 3 недели виден результат</div>
+    </div>
+    <div class="mcol">
+      <div class="mh">М2</div>
+      <div class="mdo">Робот молча читает поток и учится — решений не принимает; звонки превращаются в текст</div>
+      <div class="mwho"><b>Пилот — 1 ЖК</b>; остальные живут как раньше</div>
+      <div class="mgate">✓ точность ≥80%; заявки собраны в одну очередь</div>
+    </div>
+    <div class="mcol">
+      <div class="mh">М3</div>
+      <div class="mdo">Робот работает сам: сортирует простые заявки; включается предсказатель (пока молча); своя модель</div>
+      <div class="mwho"><b>Тот же пилотный ЖК</b></div>
+      <div class="mgate">✓ точность ≥85%; аварии ловим ≥95%</div>
+    </div>
+    <div class="mcol">
+      <div class="mh">М4</div>
+      <div class="mdo">Предсказания меняют процесс: рисковые заявки не закрываются без контрольного звонка или фото</div>
+      <div class="mwho"><b>Пилот — полный режим</b>; + 2–3 соседних ЖК в режиме наблюдения</div>
+      <div class="mgate">✓ новый процесс работает в 9 случаях из 10</div>
+    </div>
+    <div class="mcol">
+      <div class="mh">М5</div>
+      <div class="mdo">Меряем реальные деньги (не прогноз!) и решаем: тиражировать?</div>
+      <div class="mwho"><b>Замер: пилот против остальных</b>; дальше — волнами, новый ЖК = 2 недели</div>
+      <div class="mgate">✓ экономия подтверждена замером</div>
+    </div>
+  </div>
+  <div class="tlnote"><b>Пилотный ЖК</b> — средний по проблемности: не образцовый (ничего не докажет) и не самый убитый (утонем в разборах). Для честного сравнения 5–10% обычных заявок пилота работают по-старому (аварий не касается). Команда без своих программистов: аутсорс-разработчик (оплата по точкам) + ответственный в УК + оператор «службы заботы» (35–50 тыс. ₽/мес). Бюджет 2,5 млн: половина — разработка; интеграция и боты, люди, резерв; на сам ИИ — копейки.</div>
+
+  <div class="s4mid">
+    <div>
+      <div class="seclab red">Что может пойти не так</div>
+      <table class="risk">
+        <tr><td>Робот ошибётся на аварии</td><td>авариями рулят железные правила; робот может только повысить срочность</td></tr>
+        <tr><td>Данные грязнее, чем думали</td><td>проверяем в первые 2 недели, а не в конце проекта</td></tr>
+        <tr><td>Диспетчеры испугаются замены</td><td>в пилоте никого не сокращаем; за помощь в обучении робота — доплата</td></tr>
+        <tr><td>Утечка данных жильцов</td><td>всё хранится и считается в России; наружу — только тексты без имён и адресов</td></tr>
+        <tr><td>Подрядчик сорвёт сроки</td><td>платим только за пройденные точки; код и данные — собственность УК</td></tr>
+        <tr><td>Зимой жалобы станут другими</td><td>следим за качеством каждую неделю, дообучаем модель</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="seclab green">Деньги</div>
+      <div class="money3">
+        <div class="mcard m-red"><h4>Потратим</h4><div class="n">2,5 млн ₽</div>за 5 месяцев<br>+ ~1,2 млн/год на поддержку</div>
+        <div class="mcard m-grn"><h4>Вернём в год</h4><div class="n">~7,7 млн ₽</div>6,0 млн — исчезает каждый 4-й повторный выезд · 1,7 млн — освобождаются 2+ человека</div>
+        <div class="mcard m-acc"><h4>Окупаемость</h4><div class="n">~10-й месяц</div>эффект вдвое меньше? всё равно в плюсе — к 20-му месяцу</div>
+      </div>
+      <div class="abline">На кону больше: повторные выезды жгут <b>20–30 млн ₽/год</b>, один ушедший дом = <b>−7 млн ₽/год</b>. В расчёте — только нижний срез, замер честный: часть заявок работает по-старому для сравнения.</div>
+    </div>
+  </div>
+
+  <div class="seclab accent" style="margin-top:8px">Масштабирование</div>
+  <div class="scale">
+    <div class="st st1"><b>ПИЛОТ</b>1 ЖК, месяцы 2–5</div>
+    <div class="sar">→</div>
+    <div class="st st2"><b>ВСЕ ЖК «КомфортДома»</b>с 6-го месяца, волнами: новый ЖК = 2 недели (наблюдение → включение)</div>
+    <div class="sar">→</div>
+    <div class="st st3"><b>SaaS ДЛЯ РЫНКА — год 2</b>в России ~20 тыс. управляющих компаний с теми же болями: продаём систему как сервис по подписке. Готовность к этому закладываем с 1-го месяца — почти бесплатно</div>
+  </div>
+  <div class="whynow"><b>Почему сейчас:</b> государство хочет 75% обращений ЖКХ через ИИ к 2030 — а ИИ пока лишь у 19% управляющих компаний. Окно открыто.</div>
+
+  <div class="foot"><span>Сначала порядок, потом робот · Робот может только повышать срочность · Предсказание без действия не стоит ничего</span><span>4 / 4</span></div>
+</section>
+
+</body>
+</html>
