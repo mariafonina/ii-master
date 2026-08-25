@@ -121,6 +121,30 @@
   .farr2{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1 1 6px;min-height:6px}
   .farr2 span{display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:11px}
 
+  /* scheme v2 — по картинке Мари */
+  .sch{width:540px;margin:0 auto;display:flex;flex-direction:column;height:576px}
+  .sch-title{text-align:center;font-size:20px;font-weight:800}
+  .sch-sub{text-align:center;font-size:11px;font-style:italic;color:var(--muted);margin:1px 0 6px}
+  .sb{border-radius:10px;border:2px solid;padding:5px 10px;text-align:center;line-height:1.22}
+  .sb b{display:block;font-size:13px}
+  .sb small{display:block;font-size:9.8px;color:var(--muted);font-weight:400;margin-top:1px}
+  .sb-blue{border-color:#2456A6;background:#EBF2FC}   .sb-blue b{color:#1B4585}
+  .sb-red{border-color:#C4373D;background:#FDECEC}    .sb-red b{color:#B3372F}
+  .sb-green{border-color:#2E7D46;background:#EAF6EE}  .sb-green b{color:#226B3C}
+  .sb-purple{border-color:#7A4FC0;background:#F3EEFB} .sb-purple b{color:#5F3AA0}
+  .sb-orange{border-color:#E08A2E;background:#FDF3E6} .sb-orange b{color:#B36A14}
+  .zh{padding:7px 10px 9px}
+  .zh .chips{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:5px}
+  .zh .chip{background:#fff;border:1.5px solid #2456A6;border-radius:8px;font-size:10.5px;font-weight:700;
+            color:#1B4585;padding:5px 4px;display:flex;align-items:center;justify-content:center;gap:5px}
+  .sarr{flex:1;min-height:12px;display:flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:800;position:relative}
+  .sarr .lbl{position:absolute;left:calc(50% + 14px);font-size:10px;font-weight:400;color:var(--muted);white-space:nowrap}
+  .sbr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sbrh{flex:1;min-height:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sbrh .c{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800}
+  .sbrh .c em{font-style:normal;font-size:9.8px;font-weight:700;line-height:1.15}
+
   /* ===== SLIDE 4 ===== */
   .tl{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   .tl .mcol{border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
@@ -279,35 +303,43 @@
     </div>
 
     <div>
-      <div class="seclab accent">Путь одной заявки</div>
-      <div class="flow" style="height:548px">
-        <div class="fnode fplain">ЖИЛЕЦ <span class="rep">«капает кран», «не греет батарея»</span></div>
-        <div class="farr2" style="grid-template-columns:1fr 1fr 1fr"><span>▼</span><span>▼</span><span>▼</span></div>
-        <div class="fchan">
-          <div class="fnode">Звонок<small>запись → текст</small></div>
-          <div class="fnode">Бот в MAX<small>кнопки, адрес из профиля</small></div>
-          <div class="fnode">Сайт / личный кабинет<small>чат-помощник</small></div>
+      <div class="sch">
+        <div class="sch-title">Путь одной заявки</div>
+        <div class="sch-sub">«капает кран», «не греет батарея»</div>
+        <div class="sb sb-blue zh">
+          <b>ЖИЛЕЦ</b>
+          <div class="chips">
+            <div class="chip"><svg viewBox="0 0 24 24" width="12" height="12" fill="#1B4585"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .7-.2 1l-2.3 2.2z"/></svg> звонок</div>
+            <div class="chip"><svg viewBox="0 0 24 24" width="13" height="13" fill="#1B4585"><rect x="4" y="8" width="16" height="11" rx="3"/><circle cx="9.5" cy="13.5" r="1.6" fill="#fff"/><circle cx="14.5" cy="13.5" r="1.6" fill="#fff"/><rect x="11" y="4.5" width="2" height="4" rx="1"/><circle cx="12" cy="3.6" r="1.5"/></svg> бот в MAX</div>
+            <div class="chip"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#1B4585" stroke-width="2"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M9 21h6M12 17v4"/></svg> сайт / ЛК</div>
+          </div>
         </div>
-        <div class="farr">▼</div>
-        <div class="fnode fwide">ОДНО ОКНО ПРИЁМА<small>всё падает в одну общую очередь</small></div>
-        <div class="farr">▼</div>
-        <div class="fnode frobot">РОБОТ-СОРТИРОВЩИК<small>читает каждое обращение</small></div>
-        <div class="farr2"><span>▼</span><span>▼</span></div>
-        <div class="fbr">
-          <div class="fnode fred">«Прорвало», «газ», «человек в лифте» → АВАРИЙНАЯ БРИГАДА, СРАЗУ<small>железные правила; ИИ не имеет права понизить срочность</small></div>
-          <div class="fnode fok">Обычная заявка<small>робот сам ставит категорию и срочность → передаёт нужному мастеру</small></div>
+        <div class="sarr" style="color:#2456A6">▼<span class="lbl">запись → текст</span></div>
+        <div class="sb sb-blue"><b>ОДНО ОКНО ПРИЁМА</b><small>всё в одну общую очередь</small></div>
+        <div class="sarr" style="color:#2456A6">▼</div>
+        <div class="sb sb-blue"><b>РОБОТ-СОРТИРОВЩИК</b><small>читает обращение</small></div>
+        <div class="sbrh">
+          <div class="c" style="color:#B3372F"><em>«прорвало», «газ»,<br>«человек в лифте»</em><span>▼</span></div>
+          <div class="c" style="color:#1B4585"><span>▼</span><em>обычная заявка</em></div>
         </div>
-        <div class="farr">▼</div>
-        <div class="fnode fwide">МАСТЕР ЧИНИТ<small>бот в любой момент сам отвечает жильцу, где его заявка</small></div>
-        <div class="farr">▼</div>
-        <div class="fnode frobot">РОБОТ-ПРЕДСКАЗАТЕЛЬ<small>«вернётся ли жалоба?»</small></div>
-        <div class="farr2"><span>▼</span><span>▼</span></div>
-        <div class="fbr">
-          <div class="fnode famber">Риск высокий — закрыть нельзя<small>сначала контрольный звонок или фото работы</small></div>
-          <div class="fnode fgrn">Риск низкий<small>заявка закрыта</small></div>
+        <div class="sbr">
+          <div class="sb sb-red"><b>АВАРИЙНАЯ БРИГАДА — СРАЗУ</b><small>жёсткие правила, ИИ не имеет права понизить срочность</small></div>
+          <div class="sb sb-blue"><b>сам ставит категорию и срочность</b><small>передаёт нужному мастеру</small></div>
         </div>
-        <div class="farr">▼</div>
-        <div class="fnode fbot">ДОВОЛЬНЫЙ ЖИЛЕЦ<small>меньше повторов → меньше злых оценок → дом не уходит к другой УК</small></div>
+        <div class="sarr" style="color:#226B3C">▼</div>
+        <div class="sb sb-green"><b>МАСТЕР ЧИНИТ</b><small>бот в любой момент сам отвечает жильцу, где его заявка</small></div>
+        <div class="sarr" style="color:#5F3AA0">▼</div>
+        <div class="sb sb-purple"><b>РОБОТ-ПРЕДСКАЗАТЕЛЬ</b><small>вернётся ли жалоба?</small></div>
+        <div class="sbrh">
+          <div class="c" style="color:#B36A14"><em>риск высокий</em><span>▼</span></div>
+          <div class="c" style="color:#226B3C"><span>▼</span><em>риск низкий</em></div>
+        </div>
+        <div class="sbr">
+          <div class="sb sb-orange"><b>закрыть нельзя</b><small>контрольный звонок или фото работы</small></div>
+          <div class="sb sb-green" style="display:flex;align-items:center;justify-content:center"><b>заявка закрыта</b></div>
+        </div>
+        <div class="sarr" style="color:#226B3C">▼</div>
+        <div class="sb sb-green"><b>ДОВОЛЬНЫЙ ЖИЛЕЦ</b><small>меньше повторов → меньше злых оценок → дом не уходит к другой УК</small></div>
       </div>
     </div>
   </div>
